@@ -153,7 +153,7 @@ kubectl get gateway,httproute -n medisupply
 **Port Forwarding**
 ```bash
 # Forward traffic to access the services locally
-kubectl port-forward svc/medisupply-gateway-istio 8080:80
+kubectl port-forward svc/medisupply-gateway-istio 8080:80 -n medisupply
 ```
 
 ## 🔧 Configuration
