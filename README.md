@@ -128,7 +128,7 @@ kubectl apply -f gateway.yaml -n medisupply
 
 **Change the service type to ClusterIP by annotating the gateway:** 
 ```bash
-kubectl annotate gateway bookinfo-gateway networking.istio.io/service-type=ClusterIP --namespace=medisupply
+kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=medisupply
 ```
 
 ### Step 6: Verify Deployment
