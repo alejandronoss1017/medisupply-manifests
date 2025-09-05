@@ -150,16 +150,10 @@ kubectl get gateway,httproute -n medisupply
 
 ### Step 7: Access the Application
 
-**Option 1: Port Forwarding (Development)**
+**Port Forwarding**
 ```bash
 # Forward traffic to access the services locally
-kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80
-```
-
-**Option 2: LoadBalancer (Production)**
-```bash
-# Get the external IP (cloud environments)
-kubectl get svc -n istio-system istio-ingressgateway
+kubectl port-forward svc/medisupply-gateway-istio 8080:80
 ```
 
 ## 🔧 Configuration
