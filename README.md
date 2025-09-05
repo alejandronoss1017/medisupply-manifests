@@ -118,7 +118,7 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 kubectl apply -f inventories-storage/ -n medisupply
 kubectl apply -f commerce-sales/ -n medisupply
 kubectl apply -f logistics-distributions/ -n medisupply
-kubectl apply -f "regulatory-health-compliance /" -n medisupply
+kubectl apply -f regulatory-health-compliance/ -n medisupply
 ```
 
 **Deploy the Gateway configuration:**
