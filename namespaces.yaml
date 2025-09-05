@@ -1,0 +1,34 @@
+##################################################################################################
+# Namespaces for MediSupply Microservices
+##################################################################################################
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: commerce-sales
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: inventories-storage
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logistics-distributions
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: regulatory-health-compliance
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
