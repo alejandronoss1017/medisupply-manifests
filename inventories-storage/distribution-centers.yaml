@@ -1,0 +1,51 @@
+##################################################################################################
+# distribution-centers service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: distribution-centers
+  labels:
+    app: distribution-centers
+    service: distribution-centers
+spec:
+  ports:
+    - port: 3000
+      name: http
+  selector:
+    app: distribution-centers
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-distribution-centers
+  labels:
+    account: distribution-centers
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distribution-centers-v1
+  labels:
+    app: distribution-centers
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: distribution-centers
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: distribution-centers
+        version: v1
+    spec:
+      serviceAccountName: medisupply-distribution-centers
+
+      containers:
+        - name: distribution-centers
+          image: public.ecr.aws/q2b4w2e6/dummies/centro-distribucion-ms:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000

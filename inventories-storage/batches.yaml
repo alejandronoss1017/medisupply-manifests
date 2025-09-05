@@ -1,0 +1,51 @@
+##################################################################################################
+# batches service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: batches
+  labels:
+    app: batches
+    service: batches
+spec:
+  ports:
+  - port: 3000
+    name: http
+  selector:
+    app: batches
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-batches
+  labels:
+    account: batches
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: batches-v1
+  labels:
+    app: batches
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: batches
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: batches
+        version: v1
+    spec:
+      serviceAccountName: medisupply-batches
+
+      containers:
+      - name: batches
+        image: public.ecr.aws/q2b4w2e6/dummies/lote-ms:1.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000

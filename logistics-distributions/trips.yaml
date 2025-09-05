@@ -1,0 +1,51 @@
+##################################################################################################
+# trips service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: trips
+  labels:
+    app: trips
+    service: trips
+spec:
+  ports:
+    - port: 3000
+      name: http
+  selector:
+    app: trips
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-trips
+  labels:
+    account: trips
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trips-v1
+  labels:
+    app: trips
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trips
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: trips
+        version: v1
+    spec:
+      serviceAccountName: medisupply-trips
+
+      containers:
+        - name: trips
+          image: public.ecr.aws/q2b4w2e6/dummies/ruta-ms:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000

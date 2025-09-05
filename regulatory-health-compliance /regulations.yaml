@@ -1,0 +1,51 @@
+##################################################################################################
+# regulations service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: regulations
+  labels:
+    app: regulations
+    service: regulations
+spec:
+  ports:
+    - port: 3000
+      name: http
+  selector:
+    app: regulations
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-regulations
+  labels:
+    account: regulations
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: regulations-v1
+  labels:
+    app: regulations
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: regulations
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: regulations
+        version: v1
+    spec:
+      serviceAccountName: medisupply-regulations
+
+      containers:
+        - name: regulations
+          image: public.ecr.aws/q2b4w2e6/dummies/normativa-ms:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000

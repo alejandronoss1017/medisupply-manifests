@@ -1,0 +1,50 @@
+##################################################################################################
+# sales service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: sales
+  labels:
+    app: sales
+    service: sales
+spec:
+  ports:
+  - port: 3000
+    name: http
+  selector:
+    app: sales
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-sales
+  labels:
+    account: sales
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sales-v1
+  labels:
+    app: sales
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sales
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: sales
+        version: v1
+    spec:
+      serviceAccountName: medisupply-sales
+      containers:
+      - name: sales
+        image: public.ecr.aws/q2b4w2e6/dummies/venta-ms:1.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000

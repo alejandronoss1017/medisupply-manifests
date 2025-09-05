@@ -1,0 +1,51 @@
+##################################################################################################
+# alerts service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: alerts
+  labels:
+    app: alerts
+    service: alerts
+spec:
+  ports:
+    - port: 3000
+      name: http
+  selector:
+    app: alerts
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-alerts
+  labels:
+    account: alerts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alerts-v1
+  labels:
+    app: alerts
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alerts
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: alerts
+        version: v1
+    spec:
+      serviceAccountName: medisupply-alerts
+
+      containers:
+        - name: alerts
+          image: public.ecr.aws/q2b4w2e6/dummies/alerta-ms:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
