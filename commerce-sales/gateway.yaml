@@ -1,0 +1,36 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: commerce-sales-gateway
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: commerce-sales-route
+spec:
+  parentRefs:
+    - name: commerce-sales-gateway
+  rules:
+    # Sales service routing
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/sales
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: sales
+          port: 3000

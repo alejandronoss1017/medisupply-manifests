@@ -1,0 +1,36 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: logistics-distributions-gateway
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: logistics-distributions-route
+spec:
+  parentRefs:
+    - name: logistics-distributions-gateway
+  rules:
+    # Trips service routing
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/trips
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: trips
+          port: 3000
