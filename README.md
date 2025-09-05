@@ -204,12 +204,33 @@ MediSupply includes built-in observability through Istio's telemetry features:
 
 ### Access Observability Tools
 
+**Install Kiali, Grafana, Prometheus and Jaeger addons:**
+```bash
+# Install kiali addon
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.27/samples/addons/kiali.yaml
+
+# Install grafana addon
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.27/samples/addons/grafana.yaml
+
+# Install Prometheus addon
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.27/samples/addons/prometheus.yaml
+
+# Install Jaeger addon
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.27/samples/addons/jaeger.yaml
+
+# Wait for all deployments to be ready
+kubectl rollout status deployment/kiali -n istio-system
+```
+
 ```bash
 # Kiali (Service Mesh Visualization)
 istioctl dashboard kiali
 
 # Grafana (Metrics Dashboard)
 istioctl dashboard grafana
+
+# Prometheus (Metrics Dashboard)
+istioctl dashboard prometheus
 
 # Jaeger (Distributed Tracing)
 istioctl dashboard jaeger
