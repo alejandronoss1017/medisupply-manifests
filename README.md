@@ -126,6 +126,11 @@ kubectl apply -f regulatory-health-compliance/ -n medisupply
 kubectl apply -f gateway.yaml -n medisupply
 ```
 
+**Change the service type to ClusterIP by annotating the gateway:** 
+```bash
+kubectl annotate gateway bookinfo-gateway networking.istio.io/service-type=ClusterIP --namespace=medisupply
+```
+
 ### Step 6: Verify Deployment
 
 **Check all pods are running:**
