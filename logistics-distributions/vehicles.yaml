@@ -1,61 +1,57 @@
 ##################################################################################################
-# trips service
+# vehicles service
 ##################################################################################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: trips
+  name: vehicles
   labels:
-    app: trips
-    service: trips
+    app: vehicles
+    service: vehicles
 spec:
   ports:
     - port: 3000
       name: http
   selector:
-    app: trips
+    app: vehicles
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: medisupply-trips
+  name: medisupply-vehicles
   labels:
-    account: trips
+    account: vehicles
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: trips-v1
+  name: vehicles-v1
   labels:
-    app: trips
+    app: vehicles
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: trips
+      app: vehicles
       version: v1
   template:
     metadata:
       labels:
-        app: trips
+        app: vehicles
         version: v1
     spec:
-      serviceAccountName: medisupply-trips
+      serviceAccountName: medisupply-vehicles
 
       containers:
-        - name: trips
-          image: public.ecr.aws/q2b4w2e6/dummies/ruta-ms:1.1.0
+        - name: vehicles
+          image: public.ecr.aws/q2b4w2e6/dummies/vehiculo-ms:1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:
             - name: SERVICE_NAME
-              value: "RUTA MS"
-            - name: NORMATIVA_MS_URL
-              value: "http://regulations:3000"
-            - name: VEHICULO_MS_URL
-              value: "http://vehicles:3000"
+              value: "VEHICULO MS"
           readinessProbe:
             httpGet:
               path: /health
