@@ -53,9 +53,11 @@ spec:
             - name: SERVICE_NAME
               value: "RUTA MS"
             - name: NORMATIVA_MS_URL
-              value: "http://regulations:3000"
+            # Use FQDN for cross-namespace communication
+            - name: NORMATIVA_MS_URL
+              value: "http://regulations.regulatory-health-compliance.svc.cluster.local:3000"
             - name: VEHICULO_MS_URL
-              value: "http://vehicles:3000"
+              value: "http://vehicles.logistics-distributions.svc.cluster.local:3000"
           readinessProbe:
             httpGet:
               path: /health

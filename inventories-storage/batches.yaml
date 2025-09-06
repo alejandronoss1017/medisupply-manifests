@@ -52,10 +52,11 @@ spec:
         env:
           - name: SERVICE_NAME
             value: "LOTE MS"
+          # Use FQDN for cross-namespace communication
           - name: NORMATIVA_MS_URL
-            value: "http://regulations:3000"
+            value: "http://regulations.regulatory-health-compliance.svc.cluster.local:3000"
           - name: CENTRO_MS_URL
-            value: "http://distribution-centers:3000"
+            value: "http://distribution-centers.inventories-storage.svc.cluster.local:3000"
         readinessProbe:
           httpGet:
             path: /health

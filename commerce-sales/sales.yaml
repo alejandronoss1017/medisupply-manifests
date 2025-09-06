@@ -51,10 +51,11 @@ spec:
         env:
           - name: SERVICE_NAME
             value: "VENTA MS"
+          # Use FQDN for cross-namespace communication
           - name: CENTRO_MS_URL
-            value: "http://distribution-centers:3000"
+            value: "http://distribution-centers.inventories-storage.svc.cluster.local:3000"
           - name: RUTA_MS_URL
-            value: "http://trips:3000"
+            value: "http://trips.logistics-distributions.svc.cluster.local:3000"
         readinessProbe:
           httpGet: { path: /health, port: 3000 }
           initialDelaySeconds: 2
