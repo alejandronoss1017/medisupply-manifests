@@ -1,24 +1,12 @@
 apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: commerce-sales-gateway
-spec:
-  gatewayClassName: istio
-  listeners:
-    - name: http
-      port: 80
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: All
----
-apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: commerce-sales-route
 spec:
+  # The name of the Gateway that this route belongs to
   parentRefs:
-    - name: commerce-sales-gateway
+    - name: medisupply-gateway
+      namespace: default
   rules:
     # Sales service routing
     - matches:

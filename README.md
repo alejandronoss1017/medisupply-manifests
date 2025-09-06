@@ -120,8 +120,12 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 
 ```bash
 # Apply namespace configuration with Istio injection enabled
+kubectl label namespace default istio-injection=enabled
 kubectl apply -f namespaces.yaml
 ```
+> Note: The `namespaces.yaml` file contains the namespace definitions for the services.
+> The default namespace is used for the Istio ingress gateway. The other namespaces are used for the services.
+
 ### Step 5: Deploy MediSupply Services
 
 ```bash
@@ -129,7 +133,7 @@ kubectl apply -f namespaces.yaml
 kubectl apply -f commerce-sales/ -n commerce-sales
 
 # Deploy Inventories Storage domain services
-kubectl apply -f inventories-storage/-n inventories-storage
+kubectl apply -f inventories-storage/ -n inventories-storage
 
 # Deploy Logistics Distributions domain services
 kubectl apply -f logistics-distributions/ -n logistics-distributions
@@ -137,18 +141,20 @@ kubectl apply -f logistics-distributions/ -n logistics-distributions
 # Deploy Regulatory Health Compliance domain services
 kubectl apply -f regulatory-health-compliance/ -n regulatory-health-compliance
 ```
-
-### Step 6: Change the services type to ClusterIP by annotating the gateway
+### Step 6: Deploy MediSupply Gateway
 
 ```bash
-kubectl annotate gateway inventories-storage-gateway networking.istio.io/service-type=ClusterIP --namespace=inventories-storage
-kubectl annotate gateway commerce-sales-gateway networking.istio.io/service-type=ClusterIP --namespace=commerce-sales
-kubectl annotate gateway logistics-distributions-gateway networking.istio.io/service-type=ClusterIP --namespace=logistics-distributions
-kubectl annotate gateway regulatory-health-compliance-gateway networking.istio.io/service-type=ClusterIP --namespace=regulatory-health-compliance
+kubectl apply -f gateway.yaml -n default
+```
+
+### Step 7: Change the services type to ClusterIP by annotating the gateway
+
+```bash
+kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=default
 ```
 
 
-### Step 7: Verify Deployment
+### Step 8: Verify Deployment
 
 **Check all pods are running:**
 ```bash
@@ -175,21 +181,11 @@ kubectl get httproute -A
 ```
 
 
-### Step 8: Access the Application
+### Step 9: Access the Application
 
 **Port Forwarding**
 ```bash
-# Commerce Sales services
-kubectl port-forward svc/commerce-sales-gateway-istio 8081:80 -n commerce-sales
-
-# Inventories Storage services  
-kubectl port-forward svc/inventories-storage-gateway-istio 8082:80 -n inventories-storage
-
-# Logistics Distributions services
-kubectl port-forward svc/logistics-distributions-gateway-istio 8083:80 -n logistics-distributions
-
-# Regulatory Health Compliance services
-kubectl port-forward svc/regulatory-health-compliance-gateway-istio 8084:80 -n regulatory-health-compliance
+kubectl port-forward svc/medisupply-gateway-istio 8080:80 -n default
 ```
 
 ## 🔧 Configuration
@@ -236,19 +232,19 @@ Once deployed, the services expose RESTful APIs:
 ### Example API Calls
 
 ```bash
-# Commerce Sales (port 8081)
-curl http://localhost:8081/api/v1/sales
+# Commerce Sales
+curl http://localhost:8080/api/v1/sales
 
-# Inventories Storage (port 8082)
-curl http://localhost:8082/api/v1/batches
-curl http://localhost:8082/api/v1/distribution-centers
+# Inventories Storage 
+curl http://localhost:8080/api/v1/batches
+curl http://localhost:8080/api/v1/distribution-centers
 
-# Logistics Distributions (port 8083)
-curl http://localhost:8083/api/v1/trips
+# Logistics Distributions
+curl http://localhost:8080/api/v1/trips
 
-# Regulatory Health Compliance (port 8084)
-curl http://localhost:8084/api/v1/alerts
-curl http://localhost:8084/api/v1/regulations
+# Regulatory Health Compliance
+curl http://localhost:8080/api/v1/alerts
+curl http://localhost:8080/api/v1/regulations
 ```
 
 ## 🔍 Monitoring and Observability
