@@ -12,48 +12,44 @@ MediSupply is a comprehensive microservices-based platform designed to manage co
 
 ### 🏗️ Architecture
 
-The platform follows a microservices architecture with the following core services:
+The platform follows a domain-driven microservices architecture with services organized across multiple namespaces for better isolation and management:
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                    Istio Gateway                     │
-│                 (medisupply-gateway)                 │
-└─────────────────────────┬────────────────────────────┘
-                          │
-           ┌──────────────┼──────────────┐
-           │              │              │
-    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-    │   Sales     │ │   Batches   │ │ Distribution│
-    │  Service    │ │  Service    │ │   Centers   │
-    └─────────────┘ └─────────────┘ └─────────────┘
-           │              │              │
-    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-    │   Trips     │ │   Alerts    │ │ Regulations │
-    │  Service    │ │  Service    │ │   Service   │
-    └─────────────┘ └─────────────┘ └─────────────┘
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌────────────────────┐
+│ commerce-     │ │ inventories-  │ │ logistics-    │ │ regulatory-health- │
+│ sales         │ │ storage       │ │ distributions │ │ compliance         │
+├───────────────┤ ├───────────────┤ ├───────────────┤ ├────────────────────┤
+│ • Sales       │ │ • Batches     │ │ • Trips       │ │ • Regulations      │
+│   Service     │ │ • Distribution│ │ • Vehicles    │ │ • Alerts           │
+│               │ │   Centers     │ │               │ │                    │
+└───────────────┘ └───────────────┘ └───────────────┘ └────────────────────┘
 ```
 
-### 🔧 Services
+### 🔧 Services & Namespaces
 
-| Service | Description | API Endpoint | Port |
-|---------|-------------|--------------|------|
-| **Sales** | Handle sales transactions and orders | `/api/v1/sales` | 3000 |
-| **Batches** | Track product batches and expiration dates | `/api/v1/batches` | 3000 |
-| **Distribution Centers** | Manage warehouse operations and inventory | `/api/v1/distribution-centers` | 3000 |
-| **Trips** | Coordinate logistics and delivery schedules | `/api/v1/trips` | 3000 |
-| **Alerts** | Monitor critical events and notifications | `/api/v1/alerts` | 3000 |
-| **Regulations** | Ensure compliance with health regulations | `/api/v1/regulations` | 3000 |
+| Namespace                        | Service              | Description                                 | API Endpoint                   | Port |
+|----------------------------------|----------------------|---------------------------------------------|--------------------------------|------|
+| **commerce-sales**               | Sales                | Handle sales transactions and orders        | `/api/v1/sales`                | 3000 |
+| **inventories-storage**          | Batches              | Track product batches and expiration dates  | `/api/v1/batches`              | 3000 |
+| **inventories-storage**          | Distribution Centers | Manage warehouse operations and inventory   | `/api/v1/distribution-centers` | 3000 |
+| **logistics-distributions**      | Trips                | Coordinate logistics and delivery schedules | `/api/v1/trips`                | 3000 |
+| **logistics-distributions**      | Vehicles             | Manage fleet and vehicle assignments        | `/api/v1/vehicles`             | 3000 |
+| **regulatory-health-compliance** | Alerts               | Monitor critical events and notifications   | `/api/v1/alerts`               | 3000 |
+| **regulatory-health-compliance** | Regulations          | Ensure compliance with health regulations   | `/api/v1/regulations`          | 3000 |
 
 ### 🚀 Key Features
-
+ 
 - 📦 **Real-time Inventory Management** - Track medical supplies across multiple locations
 - 🔄 **Batch Tracking** - Monitor expiration dates and batch information
 - 🚛 **Logistics Optimization** - Efficient trip planning and delivery coordination
 - ⚖️ **Regulatory Compliance** - Automated compliance monitoring and reporting
 - 🚨 **Alert System** - Proactive notifications for critical events
 - 💰 **Sales Management** - Comprehensive order and transaction processing
+- 🔒 **mTLS Security** - End-to-end encryption between all services
+- 🎯 **Domain Isolation** - Services organized by business domain in separate namespaces
 
 ## 📋 Prerequisites
+
 
 Before installing MediSupply, ensure you have the following tools installed:
 
@@ -73,35 +69,45 @@ Follow these steps to deploy MediSupply to your Kubernetes cluster:
 
 ### Step 1: Install Required Tools
 
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
 **Install Kubectl:**
 ```bash
+# macOS
 brew install kubectl
+
+# Linux
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# Windows (using Chocolatey)
+choco install kubernetes-cli
+
+# Windows (using winget)
+winget install -e --id Kubernetes.kubectl
 ```
 
 **Install Istio CLI:**
 ```bash
+# macOS
 brew install istioctl
+
+# Linux/Windows
+curl -L https://istio.io/downloadIstio | sh -
+# Add istioctl to your PATH
 ```
 
-### Step 2: Prepare Your Kubernetes Cluster
-
-**Create and configure the namespace:**
-```bash
-# Create the medisupply namespace
-kubectl create namespace medisupply
-
-# Enable Istio sidecar injection
-kubectl label namespace medisupply istio-injection=enabled
-```
-
-### Step 3: Install Istio Service Mesh
+### Step 2: Install Istio Service into Your Kubernetes Cluster
 
 ```bash
 # Install Istio with default profile
 istioctl install --set profile=default --set values.global.platform=gke -y
+
+# Verify Istio installation
+istioctl verify-install
 ```
 
-### Step 4: Install Gateway API CRDs
+### Step 3: Install Gateway API CRDs
 
 ```bash
 # Install Kubernetes Gateway API Custom Resource Definitions
@@ -110,53 +116,94 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 }
 ```
 
+### Step 4: Create and Configure Namespaces
+
+```bash
+# Apply namespace configuration with Istio injection enabled
+kubectl apply -f namespaces.yaml
+```
 ### Step 5: Deploy MediSupply Services
 
-**Deploy all microservices:**
 ```bash
-# Deploy all services to the medisupply namespace
-kubectl apply -f inventories-storage/ -n medisupply
-kubectl apply -f commerce-sales/ -n medisupply
-kubectl apply -f logistics-distributions/ -n medisupply
-kubectl apply -f regulatory-health-compliance/ -n medisupply
+# Deploy Commerce Sales domain services
+kubectl apply -f commerce-sales/ -n commerce-sales
+
+# Deploy Inventories Storage domain services
+kubectl apply -f inventories-storage/-n inventories-storage
+
+# Deploy Logistics Distributions domain services
+kubectl apply -f logistics-distributions/ -n logistics-distributions
+
+# Deploy Regulatory Health Compliance domain services
+kubectl apply -f regulatory-health-compliance/ -n regulatory-health-compliance
 ```
 
-**Deploy the Gateway configuration:**
+### Step 6: Change the services type to ClusterIP by annotating the gateway
+
 ```bash
-kubectl apply -f gateway.yaml -n medisupply
+kubectl annotate gateway inventories-storage-gateway networking.istio.io/service-type=ClusterIP --namespace=inventories-storage
+kubectl annotate gateway commerce-sales-gateway networking.istio.io/service-type=ClusterIP --namespace=commerce-sales
+kubectl annotate gateway logistics-distributions-gateway networking.istio.io/service-type=ClusterIP --namespace=logistics-distributions
+kubectl annotate gateway regulatory-health-compliance-gateway networking.istio.io/service-type=ClusterIP --namespace=regulatory-health-compliance
 ```
 
-**Change the service type to ClusterIP by annotating the gateway:** 
-```bash
-kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=medisupply
-```
 
 ### Step 6: Verify Deployment
 
 **Check all pods are running:**
 ```bash
-kubectl get pods -n medisupply
+# Check pods in all namespaces
+kubectl get pods -n commerce-sales
+kubectl get pods -n inventories-storage
+kubectl get pods -n logistics-distributions
+kubectl get pods -n regulatory-health-compliance
 ```
 
 **Verify services are accessible:**
 ```bash
-kubectl get svc -n medisupply
+# List services across all namespaces
+kubectl get svc -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance"
 ```
 
 **Check Gateway and HTTPRoute status:**
 ```bash
-kubectl get gateway,httproute -n medisupply
+# Check gateways
+kubectl get gateway -A
+
+# Check HTTP routes
+kubectl get httproute -A
 ```
+
 
 ### Step 7: Access the Application
 
 **Port Forwarding**
 ```bash
-# Forward traffic to access the services locally
-kubectl port-forward svc/medisupply-gateway-istio 8080:80 -n medisupply
+# Commerce Sales services
+kubectl port-forward svc/commerce-sales-gateway-istio 8081:80 -n commerce-sales
+
+# Inventories Storage services  
+kubectl port-forward svc/inventories-storage-gateway-istio 8082:80 -n inventories-storage
+
+# Logistics Distributions services
+kubectl port-forward svc/logistics-distributions-gateway-istio 8083:80 -n logistics-distributions
+
+# Regulatory Health Compliance services
+kubectl port-forward svc/regulatory-health-compliance-gateway-istio 8084:80 -n regulatory-health-compliance
 ```
 
 ## 🔧 Configuration
+
+### Cross-Namespace Communication
+
+Services communicate across namespaces using Fully Qualified Domain Names (FQDNs):
+
+```yaml
+# Example: Sales service calling Distribution Centers
+env:
+  - name: CENTRO_MS_URL
+    value: "http://distribution-centers.inventories-storage.svc.cluster.local:3000"
+```
 
 ### Environment Variables
 
@@ -164,6 +211,7 @@ Each service can be configured using environment variables. Common configuration
 
 - Database connection strings
 - External API endpoints
+- Service discovery URLs (using FQDNs for cross-namespace)
 - Logging levels
 - Cache configurations
 
@@ -171,10 +219,10 @@ Each service can be configured using environment variables. Common configuration
 
 ```bash
 # Scale a specific service
-kubectl scale deployment sales-v1 --replicas=3 -n medisupply
+kubectl scale deployment sales-v1 --replicas=3 -n commerce-sales
 
 # Auto-scale based on CPU usage
-kubectl autoscale deployment sales-v1 --cpu-percent=70 --min=1 --max=10 -n medisupply
+kubectl autoscale deployment batches-v1 --cpu-percent=70 --min=1 --max=10 -n inventories-storage
 ```
 
 ## 📊 API Documentation
@@ -188,14 +236,19 @@ Once deployed, the services expose RESTful APIs:
 ### Example API Calls
 
 ```bash
-# Get all sales
-curl http://localhost:8080/api/v1/sales
+# Commerce Sales (port 8081)
+curl http://localhost:8081/api/v1/sales
 
-# Get batch information
-curl http://localhost:8080/api/v1/batches
+# Inventories Storage (port 8082)
+curl http://localhost:8082/api/v1/batches
+curl http://localhost:8082/api/v1/distribution-centers
 
-# Get distribution centers
-curl http://localhost:8080/api/v1/distribution-centers
+# Logistics Distributions (port 8083)
+curl http://localhost:8083/api/v1/trips
+
+# Regulatory Health Compliance (port 8084)
+curl http://localhost:8084/api/v1/alerts
+curl http://localhost:8084/api/v1/regulations
 ```
 
 ## 🔍 Monitoring and Observability
@@ -239,11 +292,15 @@ istioctl dashboard jaeger
 ### Health Checks
 
 ```bash
-# Check service health
-kubectl get pods -n medisupply -w
+# Monitor pods across all namespaces
+watch kubectl get pods -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance"
 
-# View service logs
-kubectl logs -f deployment/sales-v1 -n medisupply
+# View logs for a specific service
+kubectl logs -f deployment/sales-v1 -n commerce-sales
+kubectl logs -f deployment/batches-v1 -n inventories-storage
+
+# Check Istio proxy logs
+kubectl logs deployment/sales-v1 -c istio-proxy -n commerce-sales
 ```
 
 ## 🔧 Troubleshooting
@@ -252,21 +309,90 @@ kubectl logs -f deployment/sales-v1 -n medisupply
 
 **Pods not starting:**
 ```bash
-kubectl describe pod <pod-name> -n medisupply
-kubectl logs <pod-name> -n medisupply
+# Check pod details
+kubectl describe pod <pod-name> -n <namespace>
+
+# Check logs
+kubectl logs <pod-name> -n <namespace>
+kubectl logs <pod-name> -c istio-proxy -n <namespace>
+```
+
+**Cross-namespace communication issues:**
+```bash
+# Verify DNS resolution
+kubectl exec -it deployment/sales-v1 -n commerce-sales -- nslookup distribution-centers.inventories-storage.svc.cluster.local
+
+# Test connectivity
+kubectl exec -it deployment/sales-v1 -n commerce-sales -- curl -v http://distribution-centers.inventories-storage.svc.cluster.local:3000/health
+
+# Check mTLS status
+istioctl authn tls-check $(kubectl get pod -l app=sales -n commerce-sales -o jsonpath={.items[0].metadata.name}).commerce-sales distribution-centers.inventories-storage.svc.cluster.local
 ```
 
 **Gateway not accessible:**
 ```bash
-kubectl get gateway -n medisupply -o yaml
-kubectl describe httproute medisupply -n medisupply
+# Check gateway status
+kubectl get gateway -A -o wide
+kubectl describe gateway <gateway-name> -n <namespace>
+
+# Check HTTPRoute configuration
+kubectl describe httproute <route-name> -n <namespace>
+
+# Verify Istio ingress gateway
+kubectl get svc -n istio-system
 ```
 
 **Service mesh issues:**
 ```bash
-istioctl proxy-config cluster <pod-name> -n medisupply
-istioctl analyze -n medisupply
+# Analyze Istio configuration
+istioctl analyze -A
+
+# Check proxy configuration
+istioctl proxy-config cluster <pod-name> -n <namespace>
+
+# Verify sidecar injection
+kubectl get pods -n <namespace> -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].name}{"\n"}{end}'
 ```
+
+### Namespace-Specific Debugging
+
+```bash
+# Debug commerce-sales namespace
+istioctl analyze -n commerce-sales
+kubectl get all -n commerce-sales
+
+# Debug inventories-storage namespace  
+istioctl analyze -n inventories-storage
+kubectl get all -n inventories-storage
+
+# Debug logistics-distributions namespace
+istioctl analyze -n logistics-distributions
+kubectl get all -n logistics-distributions
+
+# Debug regulatory-health-compliance namespace
+istioctl analyze -n regulatory-health-compliance
+kubectl get all -n regulatory-health-compliance
+```
+
+## 🏛️ Architecture Benefits
+
+### Multi-Namespace Architecture Advantages
+
+1. **Domain Isolation**: Each business domain operates in its own namespace
+2. **Security Boundaries**: Network policies and RBAC can be applied per namespace
+3. **Resource Management**: Resource quotas and limits per domain
+4. **Team Autonomy**: Different teams can manage their own namespaces
+5. **Fault Isolation**: Issues in one namespace don't affect others
+6. **Compliance**: Easier to implement regulatory requirements per domain
+
+## 🔐 Security Best Practices
+
+1. **Always use FQDNs** for cross-namespace communication
+2. **Enable strict mTLS** for all service-to-service communication
+3. **Apply NetworkPolicies** to restrict traffic between namespaces
+4. **Use RBAC** to control access to namespace resources
+5. **Implement PodSecurityPolicies** or PodSecurityStandards
+6. **Regular certificate rotation** (handled automatically by Istio)
 
 ## 📝 License
 
