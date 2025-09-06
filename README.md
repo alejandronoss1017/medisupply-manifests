@@ -148,7 +148,7 @@ kubectl annotate gateway regulatory-health-compliance-gateway networking.istio.i
 ```
 
 
-### Step 6: Verify Deployment
+### Step 7: Verify Deployment
 
 **Check all pods are running:**
 ```bash
@@ -175,7 +175,7 @@ kubectl get httproute -A
 ```
 
 
-### Step 7: Access the Application
+### Step 8: Access the Application
 
 **Port Forwarding**
 ```bash
