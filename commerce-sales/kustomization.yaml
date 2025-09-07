@@ -1,0 +1,7 @@
+namespace: commerce-sales
+
+resources:
+  - routes.yaml
+  - security.yaml
+  - sales.yaml
+  - ../common/aws-credentials

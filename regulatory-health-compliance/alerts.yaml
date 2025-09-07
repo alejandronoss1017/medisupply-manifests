@@ -45,13 +45,17 @@ spec:
 
       containers:
         - name: alerts
-          image: public.ecr.aws/q2b4w2e6/dummies/alerta-ms:1.1.0
+          image: public.ecr.aws/q2b4w2e6/dummies/alerta-ms:1.2.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:
             - name: SERVICE_NAME
               value: "ALERTA MS"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_ACCESS_KEY_ID } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_SECRET_ACCESS_KEY } }
           readinessProbe:
             httpGet:
               path: /health

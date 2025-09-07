@@ -1,0 +1,8 @@
+namespace: logistics-distributions
+
+resources:
+  - routes.yaml
+  - security.yaml
+  - trips.yaml
+  - vehicles.yaml
+  - ../common/aws-credentials

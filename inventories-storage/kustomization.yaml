@@ -1,0 +1,8 @@
+namespace: inventories-storage
+
+resources:
+  - routes.yaml
+  - security.yaml
+  - batches.yaml
+  - distribution-centers.yaml
+  - ../common/aws-credentials

@@ -1,0 +1,8 @@
+secretGenerator:
+  - name: aws-credentials
+    envs:
+      - .env.aws
+    type: Opaque
+
+generatorOptions:
+  disableNameSuffixHash: true

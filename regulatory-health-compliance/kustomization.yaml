@@ -1,0 +1,8 @@
+namespace: regulatory-health-compliance
+
+resources:
+  - routes.yaml
+  - security.yaml
+  - alerts.yaml
+  - regulations.yaml
+  - ../common/aws-credentials

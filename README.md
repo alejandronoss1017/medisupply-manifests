@@ -116,7 +116,37 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 }
 ```
 
-### Step 4: Create and Configure Namespaces
+### Step 4: Include .env.aws credentials file
+
+To handle DynamoDB connection, create a `.env.aws` file in the common/aws-credentials folder:
+
+```
+medisupply-manifests/
+├─ gateway.yaml
+├─ namespaces.yaml
+├─ common/
+│  └─ aws-creds/
+│     ├─ kustomization.yaml
+│     └─ .env.aws  ------>  # contains AWS credentials
+└─ commerce-sales/
+   └─ ...
+```   
+With the following content:
+
+```
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_REGION=your_aws_region
+```
+
+verify your namespace can access the credentials:
+
+```bash
+kubectl -n namespace_name get secret aws-creds
+kubectl -n namespace_name describe secret aws-creds
+```
+
+### Step 5: Create and Configure Namespaces
 
 ```bash
 # Apply namespace configuration with Istio injection enabled
@@ -126,35 +156,35 @@ kubectl apply -f namespaces.yaml
 > Note: The `namespaces.yaml` file contains the namespace definitions for the services.
 > The default namespace is used for the Istio ingress gateway. The other namespaces are used for the services.
 
-### Step 5: Deploy MediSupply Services
+### Step 6: Deploy MediSupply Services
 
 ```bash
 # Deploy Commerce Sales domain services
-kubectl apply -f commerce-sales/ -n commerce-sales
+kubectl apply -k commerce-sales/
 
 # Deploy Inventories Storage domain services
-kubectl apply -f inventories-storage/ -n inventories-storage
+kubectl apply -k inventories-storage/
 
 # Deploy Logistics Distributions domain services
-kubectl apply -f logistics-distributions/ -n logistics-distributions
+kubectl apply -k logistics-distributions/
 
 # Deploy Regulatory Health Compliance domain services
-kubectl apply -f regulatory-health-compliance/ -n regulatory-health-compliance
+kubectl apply -k regulatory-health-compliance/
 ```
-### Step 6: Deploy MediSupply Gateway
+### Step 7: Deploy MediSupply Gateway
 
 ```bash
 kubectl apply -f gateway.yaml -n default
 ```
 
-### Step 7: Change the services type to ClusterIP by annotating the gateway
+### Step 8: Change the services type to ClusterIP by annotating the gateway
 
 ```bash
 kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=default
 ```
 
 
-### Step 8: Verify Deployment
+### Step 9: Verify Deployment
 
 **Check all pods are running:**
 ```bash
@@ -181,7 +211,7 @@ kubectl get httproute -A
 ```
 
 
-### Step 9: Access the Application
+### Step 10: Access the Application
 
 **Port Forwarding**
 ```bash
