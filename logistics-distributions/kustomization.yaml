@@ -5,4 +5,5 @@ resources:
   - security.yaml
   - trips.yaml
   - vehicles.yaml
+  - dynamodb-external.yaml
   - ../common/aws-credentials

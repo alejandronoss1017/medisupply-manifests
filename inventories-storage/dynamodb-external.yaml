@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: batch-db-and-distribution-center-db
+spec:
+  hosts:
+    - dynamodb.us-east-1.amazonaws.com
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL
+  exportTo:
+    - "*"

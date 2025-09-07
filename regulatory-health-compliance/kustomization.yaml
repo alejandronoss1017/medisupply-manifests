@@ -5,4 +5,5 @@ resources:
   - security.yaml
   - alerts.yaml
   - regulations.yaml
+  - dynamodb-external.yaml
   - ../common/aws-credentials
