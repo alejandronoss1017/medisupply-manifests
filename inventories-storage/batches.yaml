@@ -45,7 +45,7 @@ spec:
 
       containers:
       - name: batches
-        image: public.ecr.aws/q2b4w2e6/dummies/lote-ms:1.2.0
+        image: public.ecr.aws/q2b4w2e6/dummies/lote-ms:1.3.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -57,10 +57,14 @@ spec:
             value: "http://regulations.regulatory-health-compliance.svc.cluster.local:3000"
           - name: CENTRO_MS_URL
             value: "http://distribution-centers.inventories-storage.svc.cluster.local:3000"
+          #- name: AWS_ENDPOINT_URL_DYNAMODB
+  #          value: "https://dynamodb.us-east-2.amazonaws.com"
           - name: AWS_ACCESS_KEY_ID
             valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_ACCESS_KEY_ID } }
           - name: AWS_SECRET_ACCESS_KEY
             valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_SECRET_ACCESS_KEY } }
+          - name: AWS_REGION
+            valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_REGION } }
         readinessProbe:
           httpGet:
             path: /health

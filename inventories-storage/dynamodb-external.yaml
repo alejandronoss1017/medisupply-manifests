@@ -4,7 +4,8 @@ metadata:
   name: batch-db-and-distribution-center-db
 spec:
   hosts:
-    - dynamodb.us-east-1.amazonaws.com
+    - dynamodb.us-east-2.amazonaws.com
+    - dynamodb.us-east-2.api.aws
   ports:
     - number: 443
       name: https
