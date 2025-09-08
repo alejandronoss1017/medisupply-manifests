@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: batch-db-and-distribution-center-db
+spec:
+  hosts:
+    - dynamodb.us-east-2.amazonaws.com
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS
+  endpoints:
+  # This prevents the "unhealthy" status by not creating service endpoints that Istio tries to health check
+  # We use DNS resolution instead of STATIC endpoints

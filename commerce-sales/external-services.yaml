@@ -1,11 +1,10 @@
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
-  name: route-db-and-vehicle-db
+  name: sales-db
 spec:
   hosts:
     - dynamodb.us-east-2.amazonaws.com
-    - dynamodb.us-east-2.api.aws
   ports:
     - number: 443
       name: https
@@ -14,3 +13,5 @@ spec:
   location: MESH_EXTERNAL
   exportTo:
     - "*"
+
+

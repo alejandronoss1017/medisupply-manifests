@@ -4,5 +4,4 @@ resources:
   - routes.yaml
   - security.yaml
   - sales.yaml
-  - dynamodb-external.yaml
   - ../common/aws-credentials

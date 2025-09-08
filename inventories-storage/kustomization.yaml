@@ -5,5 +5,4 @@ resources:
   - security.yaml
   - batches.yaml
   - distribution-centers.yaml
-  - dynamodb-external.yaml
   - ../common/aws-credentials

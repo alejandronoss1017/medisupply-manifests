@@ -1,16 +1,14 @@
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
-  name: alert-db-and-regulation-db
+  name: aws-dynamodb
+  namespace: istio-system  # Single entry in istio-system for cluster-wide access
 spec:
   hosts:
     - dynamodb.us-east-2.amazonaws.com
-    - dynamodb.us-east-2.api.aws
   ports:
     - number: 443
       name: https
       protocol: TLS
-  resolution: DNS
   location: MESH_EXTERNAL
-  exportTo:
-    - "*"
+  resolution: DNS
