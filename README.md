@@ -102,9 +102,6 @@ curl -L https://istio.io/downloadIstio | sh -
 ```bash
 # Install Istio with default profile
 istioctl install --set profile=default --set values.global.platform=gke -y
-
-# Verify Istio installation
-istioctl verify-install
 ```
 
 ### Step 3: Install Gateway API CRDs
@@ -310,8 +307,32 @@ istioctl dashboard grafana
 
 # Prometheus (Metrics Dashboard)
 istioctl dashboard prometheus
+```
 
-# Jaeger (Distributed Tracing)
+### Configure Istio for distributed tracing
+```bash
+# Install distributed tracing with istioctl
+istioctl install -f ./tracing.yaml --skip-confirmation
+
+# Apply distributed tracing configuration
+kubectl apply -f telemetry.yaml
+```
+
+Simulate a requests to generate traces:
+```bash
+for i in {1..30}; do
+  curl http://localhost:8080/api/v1/sales/health
+  curl http://localhost:8080/api/v1/batches/health
+  curl http://localhost:8080/api/v1/distribution-centers/health
+  curl http://localhost:8080/api/v1/trips/health
+  curl http://localhost:8080/api/v1/vehicles/health
+  curl http://localhost:8080/api/v1/alerts/health
+  curl http://localhost:8080/api/v1/regulations/health
+done
+```
+
+See the traces in Jaeger:
+```bash
 istioctl dashboard jaeger
 ```
 
