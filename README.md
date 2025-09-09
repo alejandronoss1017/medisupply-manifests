@@ -165,11 +165,11 @@ kubectl apply -k commerce-sales/
 # Deploy Inventories Storage domain services
 kubectl apply -k inventories-storage/
 
-# Deploy Logistics Distributions domain services
-kubectl apply -k logistics-distributions/
-
 # Deploy Regulatory Health Compliance domain services
 kubectl apply -k regulatory-health-compliance/
+
+# Deploy Logistics Distributions domain services
+kubectl apply -k logistics-distributions/
 ```
 ### Step 7: Deploy MediSupply Gateway
 
