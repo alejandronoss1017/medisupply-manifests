@@ -8,6 +8,7 @@ metadata:
   labels:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: commerce-sales
 ---
 apiVersion: v1
 kind: Namespace
@@ -16,6 +17,7 @@ metadata:
   labels:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: inventories-storage
 ---
 apiVersion: v1
 kind: Namespace
@@ -24,6 +26,7 @@ metadata:
   labels:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: logistics-distributions
 ---
 apiVersion: v1
 kind: Namespace
@@ -32,3 +35,4 @@ metadata:
   labels:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: regulatory-health-compliance
