@@ -228,6 +228,51 @@ env:
     value: "http://distribution-centers.inventories-storage.svc.cluster.local:3000"
 ```
 
+### Kafka Configuration
+
+MediSupply uses Kafka for event-driven communication between namespaces. To enable Kafka, install the Strimzi operator:
+
+```bash
+kubectl create -f 'https://strimzi.io/install/latest?namespace=messaging' -n messaging
+```
+
+Create a Kafka cluster:
+
+```bash
+kubectl apply -f messaging/kafka.yaml -n messaging
+
+# Wait for the cluster to be ready
+kubectl wait kafka/medisupply-cluster --for=condition=Ready --timeout=300s -n messaging 
+```
+
+Create a Kafka topic:
+
+```bash
+kubectl apply -f messaging/topics.yaml -n messaging
+```
+
+Watch the kafbat dashboard:
+
+```bash
+kubectl apply -f messaging/kafbat.yaml -n messaging
+
+# Wait for the kafbat pod to be ready
+kubectl wait pod/kafbat-ui --for=condition=Ready --timeout=300s
+
+# Port forward to localhost:8080
+kubectl port-forward svc/kafbat 8080:8080 -n messaging
+```
+
+#### Deleting Kafka Resources
+
+```bash
+kubectl delete $(kubectl get strimzi -o name -n messaging) -n messaging
+kubectl delete pvc -l strimzi.io/name=medisupply-cluster-kafka -n messaging
+kubectl delete -f 'https://strimzi.io/install/latest?namespace=messaging' -n messaging
+kubectl delete -f messaging/topics.yaml -n messaging
+kubectl delete -f messaging/kafka.yaml -n messaging
+```
+
 ### Environment Variables
 
 Each service can be configured using environment variables. Common configurations include:

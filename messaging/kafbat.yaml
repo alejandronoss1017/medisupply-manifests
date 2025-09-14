@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafbat
+  labels:
+    app: kafbat
+    service: kafbat
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: kafbat
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-kafbat
+  labels:
+    account: kafbat
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafbat
+  labels:
+    app: kafbat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafbat
+  template:
+    metadata:
+      labels:
+        app: kafbat
+    spec:
+      serviceAccountName: medisupply-kafbat
+      containers:
+        - name: kafbat-ui
+          image: ghcr.io/kafbat/kafka-ui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+             - name: DYNAMIC_CONFIG_ENABLED
+               value: "true"
+             - name: KAFKA_CLUSTERS_0_NAME
+               value: "medisupply-cluster"
+             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+               value: "medisupply-cluster-kafka-bootstrap:9092"
