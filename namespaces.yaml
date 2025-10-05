@@ -36,11 +36,3 @@ metadata:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
     app.kubernetes.io/component: regulatory-health-compliance
----
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: messaging
-    labels:
-        app.kubernetes.io/name: medisupply
-        app.kubernetes.io/component: messaging
