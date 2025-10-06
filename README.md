@@ -69,8 +69,6 @@ Follow these steps to deploy MediSupply to your Kubernetes cluster:
 
 ### Step 1: Install Required Tools
 
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
 **Install Kubectl:**
 ```bash
 # macOS
@@ -113,7 +111,32 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 }
 ```
 
-### Step 4: Include .env.aws credentials file
+### Step 4: Install RabbitMQ operators
+
+```bash
+# RabbitMQ Operator
+kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
+
+# Dependencies for Topology Operator
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
+
+# RabbitMQ Topology Operator
+kubectl apply -f https://github.com/rabbitmq/messaging-topology-operator/releases/latest/download/messaging-topology-operator-with-certmanager.yaml
+```
+
+### Step 5: Create secrets for RabbitMQ users
+
+```bash
+    kubectl create secret generic purchases-app-queue-user-credentials --from-literal=username=purchases-app --from-literal=password=supersecret -n financial-billing
+    kubectl create secret generic invoices-app-queue-user-credentials --from-literal=username=invoices-app --from-literal=password=supersecret -n financial-billing
+```
+> These secrets are required to the applications pods to comunicate through the queue,
+> also for accesing the management UI which will be expose in http://localhost:8080/rabbitmq/.
+> 
+> The URL must have the trailing /.
+
+### Step 6: Include .env.aws credentials file
 
 To handle DynamoDB connection, create a `.env.aws` file in the common/aws-credentials folder:
 
@@ -143,7 +166,7 @@ kubectl -n namespace_name get secret aws-creds
 kubectl -n namespace_name describe secret aws-creds
 ```
 
-### Step 5: Create and Configure Namespaces
+### Step 7: Create and Configure Namespaces
 
 ```bash
 # Apply namespace configuration with Istio injection enabled
@@ -153,7 +176,7 @@ kubectl apply -f namespaces.yaml
 > Note: The `namespaces.yaml` file contains the namespace definitions for the services.
 > The default namespace is used for the Istio ingress gateway. The other namespaces are used for the services.
 
-### Step 6: Deploy MediSupply Services
+### Step 8: Deploy MediSupply Services
 
 ```bash
 # Deploy Commerce Sales domain services
@@ -167,21 +190,24 @@ kubectl apply -k regulatory-health-compliance/
 
 # Deploy Logistics Distributions domain services
 kubectl apply -k logistics-distributions/
+
+# Deploy Financial Billing domain services
+kubectl apply -k financial-billing/
 ```
-### Step 7: Deploy MediSupply Gateway
+
+### Step 9: Deploy MediSupply Gateway
 
 ```bash
 kubectl apply -f gateway.yaml -n default
 ```
 
-### Step 8: Change the services type to ClusterIP by annotating the gateway
+### Step 10: Change the services type to ClusterIP by annotating the gateway
 
 ```bash
 kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=default
 ```
 
-
-### Step 9: Verify Deployment
+### Step 11: Verify Deployment
 
 **Check all pods are running:**
 ```bash
@@ -207,8 +233,7 @@ kubectl get gateway -A
 kubectl get httproute -A
 ```
 
-
-### Step 10: Access the Application
+### Step 12: Access the Application
 
 **Port Forwarding**
 ```bash
@@ -443,4 +468,4 @@ kubectl get all -n regulatory-health-compliance
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE]() file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
