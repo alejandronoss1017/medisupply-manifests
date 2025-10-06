@@ -1,0 +1,37 @@
+##################################################################################################
+# RabbitMQ Cluster for financial-billing
+##################################################################################################
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: financial-billing-rabbitmq
+  namespace: financial-billing
+  annotations:
+    rabbitmq.com/topology-allowed-namespaces: "financial-billing"
+spec:
+  replicas: 1
+  image: rabbitmq:4.1.4-management
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_top
+      - rabbitmq_shovel
+    additionalConfig: |
+      management.path_prefix = /rabbitmq
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: financial-billing
+  labels:
+    app: rabbitmq
+spec:
+  ports:
+    - port: 5672
+      targetPort: 5672
+      name: amqp
+    - port: 15672
+      targetPort: 15672
+      name: management
+  selector:
+    app.kubernetes.io/name: financial-billing-rabbitmq

@@ -1,0 +1,8 @@
+namespace: financial-billing
+
+resources:
+  # Order here is important
+  - rabbitmq.yaml
+  - queues.yaml
+  - purchases.yaml
+  - routes.yaml

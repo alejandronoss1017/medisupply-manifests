@@ -36,3 +36,12 @@ metadata:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
     app.kubernetes.io/component: regulatory-health-compliance
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: financial-billing
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: financial-billing
