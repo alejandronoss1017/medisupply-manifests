@@ -64,6 +64,22 @@ spec:
             # Use FQDN (Fully Qualified Domain Name)
             - name: RABBITMQ_HOST
               value: rabbitmq.financial-billing.svc.cluster.local
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
         - name: purchases-worker
           image: public.ecr.aws/q2b4w2e6/dummies/purchases-ms-worker
           imagePullPolicy: IfNotPresent
