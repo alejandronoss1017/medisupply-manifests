@@ -193,6 +193,20 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 
 # RabbitMQ Topology Operator
 kubectl apply -f https://github.com/rabbitmq/messaging-topology-operator/releases/latest/download/messaging-topology-operator-with-certmanager.yaml
+
+# Wait for operators to be ready
+echo "Waiting for RabbitMQ Cluster Operator to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/rabbitmq-cluster-operator -n rabbitmq-system
+
+echo "Waiting for RabbitMQ Messaging Topology Operator to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/messaging-topology-operator -n rabbitmq-system
+
+echo "Waiting for cert-manager to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager -n cert-manager
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-cainjector -n cert-manager
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-webhook -n cert-manager
+
+echo "All operators are ready!"
 ```
 
 ### Step 5: Create secrets for RabbitMQ users
@@ -663,3 +677,16 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ---
 
 **Built with ❤️ using Kubernetes, Istio, and modern cloud-native technologies**
+
+
+---
+
+Create kafka-system namespace for kafka operator
+```bash
+kubectl create namespace kafka-system
+```
+
+Install kafka operator
+```bash
+kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka-system' -n kafka-system
+```
