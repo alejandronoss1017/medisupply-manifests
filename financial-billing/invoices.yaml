@@ -1,0 +1,105 @@
+##################################################################################################
+# invoices service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoices
+  labels:
+    app: invoices
+    service: invoices
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: invoices
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-invoices
+  labels:
+    account: invoices
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoices-v1
+  labels:
+    app: invoices
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoices
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: invoices
+        version: v1
+    spec:
+      serviceAccountName: medisupply-invoices
+      containers:
+        - name: invoices-web
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-web-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: password
+            # Use FQDN (Fully Qualified Domain Name)
+            - name: RABBITMQ_HOST
+              value: rabbitmq.financial-billing.svc.cluster.local
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+        - name: invoices-worker
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-worker-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: password
+            # Use FQDN (Fully Qualified Domain Name)
+            - name: RABBITMQ_HOST
+              value: rabbitmq.financial-billing.svc.cluster.local
+          # Liveness probe using TCP socket
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
