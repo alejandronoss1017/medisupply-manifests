@@ -188,8 +188,8 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || {
 kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
 
 # Dependencies for Topology Operator
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
+
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.5.4/cert-manager.yaml
 
 # RabbitMQ Topology Operator
 kubectl apply -f https://github.com/rabbitmq/messaging-topology-operator/releases/latest/download/messaging-topology-operator-with-certmanager.yaml
@@ -212,15 +212,9 @@ echo "All operators are ready!"
 ### Step 5: Create secrets for RabbitMQ users
 
 ```bash
-kubectl create secret generic purchases-app-queue-user-credentials \
-  --from-literal=username=purchases-app \
-  --from-literal=password=supersecret \
-  -n financial-billing
+kubectl create secret generic purchases-app-queue-user-credentials --from-literal=username=purchases-app --from-literal=password=supersecret -n financial-billing
 
-kubectl create secret generic invoices-app-queue-user-credentials \
-  --from-literal=username=invoices-app \
-  --from-literal=password=supersecret \
-  -n financial-billing
+kubectl create secret generic invoices-app-queue-user-credentials --from-literal=username=invoices-app --from-literal=password=supersecret -n financial-billing
 ```
 
 > **Note:** These secrets are required for application pods to communicate through the message queue,
