@@ -1,0 +1,118 @@
+##################################################################################################
+# NOTE: Secret not needed for this RabbitMQSource version
+##################################################################################################
+# This version of RabbitMQSource uses rabbitmqClusterReference instead of connectionSecret
+# It connects directly to the RabbitMQ cluster resource, not via a connection string
+# The RabbitMQ Operator handles authentication automatically using the cluster's credentials
+##################################################################################################
+# RABBITMQ SOURCE: Purchases Events
+##################################################################################################
+# RabbitMQSource pulls events from the purchases.events queue in RabbitMQ and publishes
+# them to the Knative Event Mesh (medisupply-broker)
+#
+# Flow: RabbitMQ Queue → RabbitMQSource → Broker → Triggers → Services
+#
+# Configuration:
+# - Connects to RabbitMQ cluster: financial-billing-rabbitmq in financial-billing namespace
+# - Queue: purchases.events (must already exist)
+# - Delivery Mode: at-least-once (events may be delivered multiple times)
+#
+# NOTE: This RabbitMQSource version requires the queue to exist in the same namespace
+# as the RabbitMQ cluster. It uses rabbitmqClusterReference, not connectionSecret.
+apiVersion: sources.knative.dev/v1alpha1
+kind: RabbitmqSource
+metadata:
+  name: purchases-rabbitmq-source
+  namespace: financial-billing  # MUST be in same namespace as RabbitMQ cluster
+  labels:
+    app: event-mesh
+    component: rabbitmq-source
+    queue: purchases
+spec:
+  # RabbitMQ Cluster Reference
+  # References the RabbitMQ cluster resource directly
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+    namespace: financial-billing
+  
+  # RabbitMQ Queue Configuration
+  rabbitmqResourcesConfig:
+    # Set to true because the queue already exists in financial-billing namespace
+    predeclared: true
+    
+    # Queue name must match the queue defined in financial-billing/queues.yaml
+    queueName: "purchases.events"
+    
+    # Virtual host in RabbitMQ (default is "/")
+    vhost: "/"
+    
+    # Parallel consumers for better throughput (adjust based on load)
+    parallelism: 3
+  
+  # ServiceAccount for the source adapter pods
+  serviceAccountName: rabbitmq-source-sa
+  
+  # Destination: Send events to the medisupply-broker in default namespace
+  # Cross-namespace sink reference
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: medisupply-broker
+      namespace: default
+  
+  # Delivery Configuration
+  # Note: deadLetterSink is not supported in this version
+  # Dead letter handling happens at the Trigger level
+  delivery:
+    # Retry configuration for failed deliveries to the broker
+    retry: 5
+    backoffPolicy: exponential
+    backoffDelay: PT2S  # Start with 2 seconds
+
+---
+##################################################################################################
+# RABBITMQ SOURCE: Invoices Events
+##################################################################################################
+# RabbitMQSource pulls events from the invoices.events queue in RabbitMQ and publishes
+# them to the Knative Event Mesh
+#
+# Flow: RabbitMQ Queue → RabbitMQSource → Broker → Triggers → Services
+apiVersion: sources.knative.dev/v1alpha1
+kind: RabbitmqSource
+metadata:
+  name: invoices-rabbitmq-source
+  namespace: financial-billing  # MUST be in same namespace as RabbitMQ cluster
+  labels:
+    app: event-mesh
+    component: rabbitmq-source
+    queue: invoices
+spec:
+  # RabbitMQ Cluster Reference
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+    namespace: financial-billing
+  
+  # RabbitMQ Queue Configuration
+  rabbitmqResourcesConfig:
+    predeclared: true
+    queueName: "invoices.events"
+    vhost: "/"
+    parallelism: 3
+  
+  # ServiceAccount for the source adapter pods
+  serviceAccountName: rabbitmq-source-sa
+  
+  # Destination: Send events to the medisupply-broker in default namespace
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: medisupply-broker
+      namespace: default
+  
+  # Delivery Configuration
+  delivery:
+    retry: 5
+    backoffPolicy: exponential
+    backoffDelay: PT2S
