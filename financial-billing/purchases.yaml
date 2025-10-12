@@ -44,7 +44,7 @@ spec:
       serviceAccountName: medisupply-purchases
       containers:
         - name: purchases-web
-          image: public.ecr.aws/q2b4w2e6/dummies/purchases-ms-web:1.0.1
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/purchases-web-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -81,7 +81,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
         - name: purchases-worker
-          image: public.ecr.aws/q2b4w2e6/dummies/purchases-ms-worker
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/purchases-worker-service:1.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: RABBITMQ_USER
@@ -97,3 +97,11 @@ spec:
             # Use FQDN (Fully Qualified Domain Name)
             - name: RABBITMQ_HOST
               value: rabbitmq.financial-billing.svc.cluster.local
+            - name: RABBITMQ_QUEUE
+              value: purchases.events
+          # Liveness probe using TCP socket
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

@@ -45,7 +45,7 @@ spec:
 
       containers:
         - name: trips
-          image: public.ecr.aws/q2b4w2e6/dummies/ruta-ms:1.3.1
+          image: public.ecr.aws/a7x9j8u1/medisupply/logistics-distributions/trips-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
