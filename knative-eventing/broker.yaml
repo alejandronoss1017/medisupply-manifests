@@ -1,0 +1,70 @@
+##################################################################################################
+# In-Memory Broker Configuration for Knative Eventing
+##################################################################################################
+# This creates a Knative Broker using in-memory channel backend (MTChannelBasedBroker)
+# NOTE: In-memory brokers are NOT persistent - events are lost on pod restart
+# Use this for development/testing only. For production, use RabbitMQ or Kafka brokers.
+---
+# In-Memory Broker in default namespace
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: medisupply-broker
+  namespace: default
+  annotations:
+    eventing.knative.dev/broker.class: MTChannelBasedBroker
+spec:
+  config:
+    apiVersion: v1
+    kind: ConfigMap
+    name: config-br-default-channel
+    namespace: knative-eventing
+  delivery:
+    deadLetterSink:
+      ref:
+        apiVersion: v1
+        kind: Service
+        name: event-dead-letter-sink
+        namespace: default
+    retry: 5
+    backoffPolicy: exponential
+    backoffDelay: PT1S
+---
+# Dead Letter Sink Service (simple event logger)
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-dead-letter-sink
+  namespace: default
+  labels:
+    app: event-dead-letter-sink
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: event-dead-letter-sink
+---
+# Simple dead letter event logger deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-dead-letter-sink
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-dead-letter-sink
+  template:
+    metadata:
+      labels:
+        app: event-dead-letter-sink
+    spec:
+      containers:
+        - name: event-display
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
