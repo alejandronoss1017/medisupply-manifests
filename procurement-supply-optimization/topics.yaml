@@ -1,0 +1,8 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: updated.med
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  topicName: updated.med
