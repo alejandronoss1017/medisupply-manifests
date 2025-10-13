@@ -1,50 +1,50 @@
 ##################################################################################################
-# batches service
+# suppliers service
 ##################################################################################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: supplier-service
+  name: suppliers-service
   labels:
-    app: supplier-service
-    service: supplier-service
+    app: suppliers-service
+    service: suppliers-service
 spec:
   ports:
   - port: 3000
     name: http
   selector:
-    app: supplier-service
+    app: suppliers-service
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: medisupply-supplier-service
+  name: medisupply-suppliers-service
   labels:
-    account: supplier-service
+    account: suppliers-service
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: supplier-service-v1
+  name: suppliers-service-v1
   labels:
-    app: supplier-service
+    app: suppliers-service
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: supplier-service
+      app: suppliers-service
       version: v1
   template:
     metadata:
       labels:
-        app: supplier-service
+        app: suppliers-service
         version: v1
     spec:
-      serviceAccountName: medisupply-supplier-service
+      serviceAccountName: medisupply-suppliers-service
 
       containers:
-      - name: supplier-service
+      - name: suppliers-service
         image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-web-service:latest
         imagePullPolicy: Always
         ports:
@@ -55,7 +55,7 @@ spec:
           - name: KAFKA_BROKERS
             value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
           - name: KAFKA_CLIENT_ID
-            value: "supplier-service"
+            value: "suppliers-service"
           - name: PORT
             value: "3000"
         resources:
