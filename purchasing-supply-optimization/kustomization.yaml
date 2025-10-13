@@ -1,7 +1,0 @@
-namespace: purchasing-supply-optimization
-
-resources:
-  # Order here is important
-  - kafka.yaml
-  - suppliers.yaml
-  - routes.yaml
