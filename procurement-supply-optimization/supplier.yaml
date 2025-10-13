@@ -45,7 +45,7 @@ spec:
 
       containers:
       - name: supplier-service
-        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-web-service:1.0.0
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-web-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
