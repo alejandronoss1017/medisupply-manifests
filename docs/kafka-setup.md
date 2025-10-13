@@ -2,70 +2,32 @@
 
 This file documents the installation steps for Kafka, these are shell commands, not Kubernetes manifests
 
-```bash
- kubectl create namespace kafka-system
-```
+## Prerequisites
 
-```bash
-kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka-system' -n kafka-system
-```
+- [kubectl](https://kubernetes.io/docs/reference/kubectl/)
+- [helm](https://helm.sh/)
 
-```bash
-  kubectl get pod -n kafka-system --watch
-```
+1. Create namespace for kafka operator
 
-```bash
-kubectl logs deployment/strimzi-cluster-operator -n kafka-system -f
-```
+    ```bash
+    kubectl create namespace kafka-system
+    ```
+2. Add Strimzi repository
+    ```bash
+    helm repo add strimzi https://strimzi.io/charts
+    helm repo update
+    ```
 
+3. Install Strimzi operator
 
-## Kafka cluster with single example
-```yaml
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaNodePool
-metadata:
-  name: dual-role
-  labels:
-    strimzi.io/cluster: my-cluster
-spec:
-  replicas: 1
-  roles:
-    - controller
-    - broker
-  storage:
-    type: jbod
-    volumes:
-      - id: 0
-        type: persistent-claim
-        size: 100Gi
-        deleteClaim: false
-        kraftMetadata: shared
----
+    ```bash
+    helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator \
+      --namespace kafka-system \
+      --set watchAnyNamespace=true
+   ```
+   > This will install the Strimzi operator in the `kafka-system` namespace and enable it to watch all namespaces.
 
-apiVersion: kafka.strimzi.io/v1beta2
-kind: Kafka
-metadata:
-  name: my-cluster
-spec:
-  kafka:
-    version: 4.1.0
-    metadataVersion: 4.1-IV1
-    listeners:
-      - name: plain
-        port: 9092
-        type: internal
-        tls: false
-      - name: tls
-        port: 9093
-        type: internal
-        tls: true
-    config:
-      offsets.topic.replication.factor: 1
-      transaction.state.log.replication.factor: 1
-      transaction.state.log.min.isr: 1
-      default.replication.factor: 1
-      min.insync.replicas: 1
-  entityOperator:
-    topicOperator: {}
-    userOperator: {}
-```
+4. Check operator installation
+    ```bash
+    helm ls -n kafka-system
+    ```
