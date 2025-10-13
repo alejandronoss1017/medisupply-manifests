@@ -29,8 +29,8 @@ spec:
     attributes:
       # Filter for purchase-related events
       # Adjust based on actual event types from your RabbitMQ messages
-      type: com.medisupply.financial.purchase.created
-  
+      type: purchase.created
+
   # Subscriber: Service that will receive the events
   # REPLACE THIS with your actual service that processes purchase events
   subscriber:
@@ -41,22 +41,6 @@ spec:
       namespace: default
     # If your service expects events at a specific path:
     # uri: /events/purchases
-  
-  # Delivery Configuration
-  delivery:
-    # Retry failed deliveries
-    retry: 3
-    backoffPolicy: exponential
-    backoffDelay: PT1S
-    
-    # Dead letter sink if all retries fail
-    deadLetterSink:
-      ref:
-        apiVersion: v1
-        kind: Service
-        name: event-dead-letter-sink
-        namespace: default
-
 ---
 ##################################################################################################
 # TRIGGER: Route Invoice Events to Subscribers
@@ -73,13 +57,13 @@ metadata:
     event-type: invoices
 spec:
   broker: medisupply-broker
-  
+
   # Event Type Filter
   filter:
     attributes:
       # Filter for invoice-related events
-      type: com.medisupply.financial.invoice.created
-  
+      type: invoice.created
+
   # Subscriber: Service that will receive the events
   # REPLACE THIS with your actual service that processes invoice events
   subscriber:
@@ -88,18 +72,6 @@ spec:
       kind: Service
       name: invoices-event-subscriber
       namespace: default
-  
-  delivery:
-    retry: 3
-    backoffPolicy: exponential
-    backoffDelay: PT1S
-    deadLetterSink:
-      ref:
-        apiVersion: v1
-        kind: Service
-        name: event-dead-letter-sink
-        namespace: default
-
 ---
 ##################################################################################################
 # TRIGGER: Catch-All for Unfiltered Events
