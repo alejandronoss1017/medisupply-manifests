@@ -4,58 +4,58 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: purchase-plan-service
+  name: contracts-service
   labels:
-    app: purchase-plan-service
-    service: purchase-plan-service
+    app: contracts-service
+    service: contracts-service
 spec:
   ports:
   - port: 3000
     name: http
   selector:
-    app: purchase-plan-service
+    app: contracts-service
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: medisupply-purchase-plan-service
+  name: medisupply-contracts-service
   labels:
-    account: purchase-plan-service
+    account: contracts-service
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: purchase-plan-service-v1
+  name: contracts-service-v1
   labels:
-    app: purchase-plan-service
+    app: contracts-service
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: purchase-plan-service
+      app: contracts-service
       version: v1
   template:
     metadata:
       labels:
-        app: purchase-plan-service
+        app: contracts-service
         version: v1
     spec:
-      serviceAccountName: medisupply-purchase-plan-service
+      serviceAccountName: medisupply-contracts-service
 
       containers:
-      - name: purchase-plan-service
-        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/purchase-plans-web-service:latest
+      - name: contracts-service
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-web-service:1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
           - name: SERVICE_NAME
-            value: "Purchase Plan Service"
+            value: "Contracts Service"
           - name: KAFKA_BROKERS
             value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
           - name: KAFKA_CLIENT_ID
-            value: "purchase-plan-service"
+            value: "contracts-service"
           - name: PORT
             value: "3000"
         resources:
@@ -77,22 +77,22 @@ spec:
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 10
-      - name: purchase-plan-worker
-        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/purchase-plans-worker-service:1.0.0
+      - name: contracts-worker
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-worker-service:1.0.0
         imagePullPolicy: Always
         env:
           - name: SERVICE_NAME
-            value: "PURCHASE-PLANS-MS-WORKER"
+            value: "CONTRACTS-MS-WORKER"
           - name: KAFKA_BROKERS
             value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
           - name: KAFKA_CLIENT_ID
-            value: "purchase-plans-ms-worker"
+            value: "contracts-ms-worker"
           - name: KAFKA_GROUP_ID
-            value: "purchase-plans-worker-group"
+            value: "contracts-worker-group"
           - name: KAFKA_TOPICS
             value: "medicine.events"
           - name: DDB_TABLE
-            value: "purchase-plans-db"
+            value: "contracts-db"
           - name: AWS_REGION
             value: "us-east-1"
           - name: KAFKA_DEFAULT_PARTITIONS
