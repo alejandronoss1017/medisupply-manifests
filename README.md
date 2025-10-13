@@ -122,6 +122,7 @@ kubectl apply -k inventories-storage/
 kubectl apply -k logistics-distributions/
 kubectl apply -k regulatory-health-compliance/
 kubectl apply -k financial-billing/
+kubectl apply -k purchasing-supply-optimization/
 
 # 6. Deploy Gateway
 kubectl apply -f gateway.yaml -n default
@@ -269,6 +270,7 @@ kubectl apply -f namespaces.yaml
 > - `logistics-distributions` - Transportation and delivery coordination
 > - `regulatory-health-compliance` - Compliance monitoring and alerts
 > - `financial-billing` - Financial transactions and message queues
+> - `purchasing-supply-optimization` - Supply chain optimization services
 >
 > All namespaces have Istio sidecar injection enabled for service mesh functionality.
 
@@ -289,6 +291,9 @@ kubectl apply -k logistics-distributions/
 
 # Deploy Financial Billing domain services
 kubectl apply -k financial-billing/
+
+# Deploy Purchasing Supply Optimization domain services
+kubectl apply -k purchasing-supply-optimization/
 ```
 
 ### Step 9: Deploy MediSupply Gateway
@@ -313,15 +318,16 @@ kubectl get pods -n inventories-storage
 kubectl get pods -n logistics-distributions
 kubectl get pods -n regulatory-health-compliance
 kubectl get pods -n financial-billing
+kubectl get pods -n purchasing-supply-optimization
 
 # Or check all at once
-kubectl get pods -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance|financial-billing"
+kubectl get pods -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance|financial-billing|purchasing-supply-optimization"
 ```
 
 **Verify services are accessible:**
 ```bash
 # List services across all MediSupply namespaces
-kubectl get svc -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance|financial-billing"
+kubectl get svc -A | grep -E "commerce-sales|inventories-storage|logistics-distributions|regulatory-health-compliance|financial-billing|purchasing-supply-optimization"
 ```
 
 **Check Gateway and HTTPRoute status:**

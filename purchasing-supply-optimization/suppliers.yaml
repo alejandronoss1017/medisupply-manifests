@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: suppliers
+  labels:
+    app: suppliers
+    service: suppliers
+spec:
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
+  selector:
+    app: suppliers
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-suppliers
+  labels:
+    account: suppliers
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suppliers-v1
+  labels:
+    app: suppliers
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: suppliers
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: suppliers
+        version: v1
+      annotations:
+        # Istio: no interceptar TCP/9092 (Kafka), evita problemas de egress/mTLS
+        traffic.sidecar.istio.io/excludeOutboundPorts: "9092"
+    spec:
+      serviceAccountName: medisupply-suppliers
+
+      # Espera a que el bootstrap de Kafka esté aceptando conexiones
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          command: ["sh","-c"]
+          args:
+            - >
+              echo "Waiting for Kafka my-cluster-kafka-bootstrap:9092..." ;
+              for i in $(seq 1 60); do
+                nc -z my-cluster-kafka-bootstrap 9092 && echo "Kafka is up" && exit 0;
+                echo "Not up yet ($i)"; sleep 2;
+              done;
+              echo "Kafka not reachable after timeout" ; exit 1
+
+      terminationGracePeriodSeconds: 30
+      containers:
+        ##################################################################
+        # suppliers-web (HTTP API que publica en Kafka)
+        ##################################################################
+        - name: suppliers-web
+          image: public.ecr.aws/q2b4w2e6/dummies/suppliers-ms-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              value: "SUPPLIERS-MS"
+            - name: PORT
+              value: "8080"
+            - name: KAFKA_CLIENT_ID
+              value: "suppliers-ms"
+            - name: KAFKA_BROKERS
+              value: "my-cluster-kafka-bootstrap:9092"
+          livenessProbe:
+            httpGet: { path: /suppliers/health, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: { path: /suppliers/health, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+        ##################################################################
+        # suppliers-worker (Kafka consumer)
+        ##################################################################
+        - name: suppliers-worker
+          image: public.ecr.aws/q2b4w2e6/dummies/suppliers-ms-worker:latest
+          imagePullPolicy: Always
+          env:
+            - name: SERVICE_NAME
+              value: "SUPPLIERS-MS-WORKER"
+            - name: KAFKA_CLIENT_ID
+              value: "suppliers-ms-worker"
+            - name: KAFKA_GROUP_ID
+              value: "suppliers-worker-group"
+            - name: KAFKA_TOPICS
+              value: "supplier-events"
+            - name: KAFKA_BROKERS
+              value: "my-cluster-kafka-bootstrap:9092"
+          # El worker no expone HTTP; usamos un liveness simple por proceso
+          livenessProbe:
+            exec:
+              command: ["sh","-c","pgrep -f 'cmd/worker/main.js' >/dev/null"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
