@@ -1,0 +1,69 @@
+##################################################################################################
+# batches service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: supplier-service
+  labels:
+    app: supplier-service
+    service: supplier-service
+spec:
+  ports:
+  - port: 3000
+    name: http
+  selector:
+    app: supplier-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-supplier-service
+  labels:
+    account: supplier-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supplier-service-v1
+  labels:
+    app: supplier-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supplier-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: supplier-service
+        version: v1
+    spec:
+      serviceAccountName: medisupply-supplier-service
+
+      containers:
+      - name: supplier-service
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-web-service:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+          - name: SERVICE_NAME
+            value: "Supplier Service"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      - name: supplier-worker
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-worker-service:1.0.0
+        imagePullPolicy: IfNotPresent

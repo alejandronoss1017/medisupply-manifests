@@ -56,9 +56,7 @@ helm repo update
 Install the Strimzi operator in the `kafka-system` namespace with cluster-wide watching enabled.
 
 ```bash
-helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator \
-  --namespace kafka-system \
-  --set watchAnyNamespace=true
+helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator --namespace kafka-system --set watchAnyNamespace=true
 ```
 
 **Why `watchAnyNamespace=true`?**

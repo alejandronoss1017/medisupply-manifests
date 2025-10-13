@@ -1,0 +1,66 @@
+##################################################################################################
+# batches service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: purchase-plan-service
+  labels:
+    app: purchase-plan-service
+    service: purchase-plan-service
+spec:
+  ports:
+  - port: 3000
+    name: http
+  selector:
+    app: purchase-plan-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-purchase-plan-service
+  labels:
+    account: purchase-plan-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purchase-plan-service-v1
+  labels:
+    app: purchase-plan-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: purchase-plan-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: purchase-plan-service
+        version: v1
+    spec:
+      serviceAccountName: medisupply-purchase-plan-service
+
+      containers:
+      - name: purchase-plan-service
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/purchase-plans-web-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3004
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      - name: purchase-plan-worker
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/purchase-plans-worker-service:1.0.0
+        imagePullPolicy: IfNotPresent
