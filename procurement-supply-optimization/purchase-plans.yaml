@@ -99,13 +99,6 @@ spec:
             value: "1"
           - name: KAFKA_DEFAULT_REPLICATION_FACTOR
             value: "1"
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
         # Liveness probe using TCP socket
         livenessProbe:
           tcpSocket:
