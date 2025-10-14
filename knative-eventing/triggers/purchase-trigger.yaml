@@ -7,7 +7,7 @@ spec:
   broker: medisupply-broker
   filter:
     attributes:
-      type: updated.med
+      type: medicine.updated
   subscriber:
     ref:
       apiVersion: v1
