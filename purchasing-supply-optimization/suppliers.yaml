@@ -39,29 +39,14 @@ spec:
         app: suppliers
         version: v1
       annotations:
-        # Istio: no interceptar TCP/9092 (Kafka), evita problemas de egress/mTLS
+        # Istio: no interceptar TCP/9092 (Kafka)
         traffic.sidecar.istio.io/excludeOutboundPorts: "9092"
     spec:
       serviceAccountName: medisupply-suppliers
-
-      # Espera a que el bootstrap de Kafka esté aceptando conexiones
-      initContainers:
-        - name: wait-for-kafka
-          image: busybox:1.36
-          command: ["sh","-c"]
-          args:
-            - >
-              echo "Waiting for Kafka my-cluster-kafka-bootstrap:9092..." ;
-              for i in $(seq 1 60); do
-                nc -z my-cluster-kafka-bootstrap 9092 && echo "Kafka is up" && exit 0;
-                echo "Not up yet ($i)"; sleep 2;
-              done;
-              echo "Kafka not reachable after timeout" ; exit 1
-
       terminationGracePeriodSeconds: 30
       containers:
         ##################################################################
-        # suppliers-web (HTTP API que publica en Kafka)
+        # suppliers-web (HTTP API)
         ##################################################################
         - name: suppliers-web
           image: public.ecr.aws/q2b4w2e6/dummies/suppliers-ms-web:latest
@@ -106,8 +91,7 @@ spec:
             - name: KAFKA_TOPICS
               value: "supplier-events"
             - name: KAFKA_BROKERS
-              value: "my-cluster-kafka-bootstrap.purchase-supply-optimization.svc.cluster.local:9092"
-          # El worker no expone HTTP; usamos un liveness simple por proceso
+              value: "my-cluster-kafka-bootstrap:9092"
           livenessProbe:
             exec:
               command: ["sh","-c","pgrep -f 'cmd/worker/main.js' >/dev/null"]

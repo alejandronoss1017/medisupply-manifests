@@ -3,5 +3,8 @@ namespace: purchasing-supply-optimization
 resources:
   # Order here is important
   - kafka.yaml
-  - suppliers.yaml
   - routes.yaml
+  - suppliers.yaml
+  - contracts.yaml
+  - purchase-plans.yaml
+  - ../common/aws-credentials
