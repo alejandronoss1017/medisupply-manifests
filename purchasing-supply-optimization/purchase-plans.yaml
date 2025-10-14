@@ -78,7 +78,7 @@ spec:
         #          initialDelaySeconds: 5
         #          periodSeconds: 10
         - name: purchase-plans-worker
-          image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/purchase-plans-worker-service:latest
+          image: public.ecr.aws/q2b4w2e6/dummies/purchase-plans-ms-worker:latest
           imagePullPolicy: Always
           env:
             - name: SERVICE_NAME

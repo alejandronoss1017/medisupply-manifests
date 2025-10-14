@@ -44,47 +44,47 @@ spec:
       serviceAccountName: medisupply-contracts-service
 
       containers:
-        - name: contracts-service
-          image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-web-service:1.0.0
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3000
-          env:
-            - name: SERVICE_NAME
-              value: "Contracts Service"
-            - name: KAFKA_BROKERS
-              value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
-            - name: KAFKA_CLIENT_ID
-              value: "contracts-service"
-            - name: PORT
-              value: "3000"
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 2
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 10
+#        - name: contracts-service
+#          image: public.ecr.aws/a7x9j8u1/medisupply/purchasing-supply-optimization/contracts-web-service:1.0.0
+#          imagePullPolicy: Always
+#          ports:
+#            - containerPort: 3000
+#          env:
+#            - name: SERVICE_NAME
+#              value: "Contracts Service"
+#            - name: KAFKA_BROKERS
+#              value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
+#            - name: KAFKA_CLIENT_ID
+#              value: "contracts-service"
+#            - name: PORT
+#              value: "3000"
+#          resources:
+#            requests:
+#              memory: "128Mi"
+#              cpu: "100m"
+#            limits:
+#              memory: "256Mi"
+#              cpu: "200m"
+#          readinessProbe:
+#            httpGet:
+#              path: /health
+#              port: 3000
+#            initialDelaySeconds: 2
+#            periodSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: /health
+#              port: 3000
+#            initialDelaySeconds: 5
+#            periodSeconds: 10
         - name: contracts-worker
-          image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-worker-service:1.0.0
+          image: public.ecr.aws/q2b4w2e6/dummies/contracts-ms-worker:latest
           imagePullPolicy: Always
           env:
             - name: SERVICE_NAME
               value: "CONTRACTS-MS-WORKER"
             - name: KAFKA_BROKERS
-              value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
+              value: "my-cluster-kafka-bootstrap.purchasing-supply-optimization.svc.cluster.local:9092"
             - name: KAFKA_CLIENT_ID
               value: "contracts-ms-worker"
             - name: KAFKA_GROUP_ID
