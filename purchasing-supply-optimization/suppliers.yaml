@@ -78,13 +78,13 @@ spec:
             - name: KAFKA_BROKERS
               value: "my-cluster-kafka-bootstrap:9092"
           livenessProbe:
-            httpGet: { path: /suppliers/health, port: 8080 }
+            httpGet: { path: /health, port: 8080 }
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            httpGet: { path: /suppliers/health, port: 8080 }
+            httpGet: { path: /health, port: 8080 }
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
@@ -106,7 +106,7 @@ spec:
             - name: KAFKA_TOPICS
               value: "supplier-events"
             - name: KAFKA_BROKERS
-              value: "my-cluster-kafka-bootstrap:9092"
+              value: "my-cluster-kafka-bootstrap.purchase-supply-optimization.svc.cluster.local:9092"
           # El worker no expone HTTP; usamos un liveness simple por proceso
           livenessProbe:
             exec:

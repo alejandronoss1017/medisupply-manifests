@@ -1,3 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway-to-suppliers
+  namespace: purchasing-supply-optimization
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      namespace: default
+  to:
+    - group: ""
+      kind: Service
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -11,13 +25,13 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/v1    # <— match /api/v1 (not /api/v1/suppliers)
+            value: /api/v1/suppliers
       filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: /   # <— so /api/v1/suppliers -> /suppliers
+              replacePrefixMatch: /
       backendRefs:
         - name: suppliers
           port: 8080
