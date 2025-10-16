@@ -103,8 +103,13 @@ info "Adding the official Strimzi Helm chart repository and update the local cac
 helm repo add strimzi https://strimzi.io/charts
 helm repo update
 
-info "Installing Strimzi Kafka Operator with Helm in namespace $KAFKA_SYSTEM_NS ..."
-helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator --namespace "$KAFKA_SYSTEM_NS" --set watchAnyNamespace=true
+info "Ensuring Strimzi Kafka Operator is installed in namespace $KAFKA_SYSTEM_NS ..."
+if helm -n "$KAFKA_SYSTEM_NS" status strimzi-kafka-operator >/dev/null 2>&1; then
+  info "Strimzi Kafka Operator already installed in namespace $KAFKA_SYSTEM_NS; skipping Helm install."
+else
+  info "Installing Strimzi Kafka Operator with Helm in namespace $KAFKA_SYSTEM_NS ..."
+  helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator --namespace "$KAFKA_SYSTEM_NS" --set watchAnyNamespace=true
+fi
 
 
 # Wait for Strimzi operator
@@ -160,16 +165,19 @@ kubectl_wait_ns_ready knative-eventing
 info "Deploying event receiver service (knative-eventing/event-display.yaml)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/event-display.yaml"
 
-# -------- 12) Optional: Apply sources aligned with this repo --------
-if [[ "${APPLY_RABBITMQ_SOURCE:-false}" == "true" ]]; then
-  info "Deploying RabbitmqSource (financial-billing namespace)..."
-  kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
-fi
+# -------- 12) Apply sources aligned with this repo --------
+info "Deploying RabbitmqSource (financial-billing namespace)..."
+kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
 
-if [[ "${APPLY_KAFKA_SOURCE:-false}" == "true" ]]; then
-  info "Deploying KafkaSource (default namespace unless overridden)..."
-  kubectl apply -f "$REPO_ROOT/knative-eventing/sources/kafka.yaml"
-fi
+info "Deploying KafkaSource (default namespace)..."
+kubectl apply -f "$REPO_ROOT/knative-eventing/sources/kafka.yaml"
+
+# Wait for sources to be Ready (best-effort)
+info "Waiting for RabbitmqSource to be Ready..."
+kubectl wait --for=condition=Ready --timeout=300s rabbitmqsource/purchases-rabbitmq-source -n "$FIN_NAMESPACE" || true
+
+info "Waiting for KafkaSource to be Ready..."
+kubectl wait --for=condition=Ready --timeout=300s kafkasource/procurement-supply-optimization-kafka-source -n $PSO_NAMESPACE || true
 
 success "Knative Eventing with InMemoryChannel, MT-Channel-Broker, plus RabbitMQ and Kafka components installed."
 
@@ -185,6 +193,7 @@ echo "- Kafka data plane applied under namespace: $PSO_NAMESPACE (cluster: event
 echo "- Knative Eventing installed with: InMemoryChannel and MT-Channel-Broker."
 echo "- Knative RabbitMQ components (source + broker) installed."
 echo "- Knative Kafka components (source + controller) installed."
+echo "- RabbitMQ and Kafka sources applied (RabbitmqSource in $FIN_NAMESPACE, KafkaSource in $PSO_NAMESPACE)."
 echo "- Event receiver (event-display) deployed in namespace: default."
 
 # -------- Quick status --------
