@@ -4,7 +4,7 @@ metadata:
   name: dual-role
   namespace: procurement-supply-optimization
   labels:
-    strimzi.io/cluster: my-cluster
+    strimzi.io/cluster: procurement-supply-optimization-kafka-cluster
 spec:
   replicas: 1
   roles:
