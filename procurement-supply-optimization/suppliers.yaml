@@ -53,7 +53,7 @@ spec:
           - name: SERVICE_NAME
             value: "Supplier Service"
           - name: KAFKA_BROKERS
-            value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
+            value: "events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
           - name: KAFKA_CLIENT_ID
             value: "suppliers-service"
           - name: PORT
