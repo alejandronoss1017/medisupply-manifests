@@ -184,7 +184,7 @@ kubectl apply -f "$REPO_ROOT/knative-eventing/event-display.yaml"
 info "Deploying RabbitmqSource (financial-billing namespace)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
 
-info "Deploying KafkaSource (default namespace)..."
+info "Deploying KafkaSource (procurement-supply-optimization namespace)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/sources/kafka.yaml"
 
 # Wait for sources to be Ready (best-effort)
