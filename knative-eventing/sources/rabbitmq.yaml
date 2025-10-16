@@ -15,9 +15,9 @@ spec:
     retry: 5
     backoffPolicy: "linear"
     backoffDelay: "PT1S"
-  sink:
-    ref:
-      apiVersion: serving.knative.dev/v1
-      kind: Service
-      name: event-display
-      namespace: default
+#  sink:
+#    ref:
+#      apiVersion: serving.knative.dev/v1
+#      kind: Service
+#      name: event-display
+#      namespace: default
