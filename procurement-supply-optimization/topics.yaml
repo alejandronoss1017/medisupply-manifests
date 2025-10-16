@@ -4,6 +4,6 @@ metadata:
   name: medicine.events
   namespace: procurement-supply-optimization
   labels:
-    strimzi.io/cluster: my-cluster
+    strimzi.io/cluster: events-cluster
 spec:
   topicName: medicine.events
