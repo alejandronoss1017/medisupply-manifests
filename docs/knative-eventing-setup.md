@@ -102,3 +102,58 @@ Brokers provide a higher-level event routing abstraction with filtering capabili
     ```bash
     kubectl get pods -n knative-eventing
     ```
+## Events sources
+
+Event sources are the components that send events to Knative Eventing. Knative Eventing supports a long list of event sources,
+check the [Knative Eventing documentation](https://knative.dev/docs/eventing/) for more information. For this project
+we will use the following event sources:
+
+- Kafka Source
+- RabbitMQ Source
+
+### Kafka Source
+
+1. Install KafkaSource controller
+    ```bash
+   kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.8/eventing-kafka-controller.yaml
+    ```
+
+2. Install Kafka Source data plane
+    ```bash
+   kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.8/eventing-kafka-source.yaml
+    ```
+
+3. Verify tha `kafka-controller` and `kafka-source-dispatcher` are running
+    ```bash
+   kubectl get deployments.apps,statefulsets.apps -n knative-eventing
+    ```
+
+4. Define a kafka event source
+
+    ```yaml
+    # event-source.yaml
+    apiVersion: sources.knative.dev/v1
+    kind: KafkaSource
+    metadata:
+      name: kafka-source
+    spec:
+    consumerGroup: knative-group
+    bootstrapServers:
+      - my-cluster-kafka-bootstrap.kafka:9092 # note the kafka namespace
+    topics:
+      - knative-demo-topic
+    sink:
+      ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+    ```
+
+5. Deploy the event source
+    ```bash
+    kubectl apply -f event-source.yaml
+    ```
+6. Verify the Kafka source is ready:
+    ```bash
+    kubectl get kafkasource kafka-source
+    ```
