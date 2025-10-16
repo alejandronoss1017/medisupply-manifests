@@ -111,6 +111,13 @@ we will use the following event sources:
 - Kafka Source
 - RabbitMQ Source
 
+## Prerequisites
+
+We are going to use the knative service `event-display` to receive the events. We need to install the CRD:
+```bash
+kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
+```
+
 ### Kafka Source
 
 1. Install KafkaSource controller

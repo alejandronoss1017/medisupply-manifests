@@ -10,8 +10,8 @@ spec:
     - events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
   topics:
     - medicine.events
-#  sink:
-#    ref:
-#      apiVersion: serving.knative.dev/v1
-#      kind: Service
-#      name: event-display
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
