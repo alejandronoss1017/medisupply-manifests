@@ -1,0 +1,17 @@
+apiVersion: sources.knative.dev/v1
+kind: KafkaSource
+metadata:
+  name: procurement-supply-optimization-kafka-source
+  labels:
+    role: title
+spec:
+  consumerGroup: knative-group
+  bootstrapServers:
+    - events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
+  topics:
+    - medicine.events
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
