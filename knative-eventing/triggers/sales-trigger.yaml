@@ -9,5 +9,5 @@ spec:
     attributes:
       type: medicine.updated
   subscriber:
-    uri: http://sales.commerce-sales.svc.cluster.local:3000
+    uri: http://sales.commerce-sales.svc.cluster.local:3000/events/medicine-updated
 
