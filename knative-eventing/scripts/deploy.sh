@@ -14,13 +14,14 @@ kubectl create namespace financial-billing --dry-run=client -o yaml | kubectl ap
 # Deploy broker
 echo "🔧 Creating event broker..."
 kubectl apply -f  broker.yaml
-kubectl apply -f triggers/purchase-trigger.yaml
-kubectl apply -f triggers/sales-trigger.yaml
+
 
 # Wait for broker to be ready
 echo "⏳ Waiting for broker to be ready..."
-kubectl wait --for=condition=Ready --timeout=60s broker/medisupply-broker
+kubectl wait --for=condition=Ready --timeout=60s broker/medisupply-broker -n medisupply-eventing
 
+kubectl apply -f triggers/purchase-trigger.yaml -n medisupply-eventing
+kubectl apply -f triggers/sales-trigger.yaml -n medisupply-eventing
 # Deploy services
 echo "🛠️  Deploying services..."
 

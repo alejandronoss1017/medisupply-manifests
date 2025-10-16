@@ -2,14 +2,12 @@ apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
   name: sales-trigger
+  namespace: medisupply-eventing
 spec:
   broker: medisupply-broker
   filter:
     attributes:
       type: medicine.updated
   subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: sales #service name
+    uri: http://sales.commerce-sales.svc.cluster.local:3000
 
