@@ -67,8 +67,8 @@ Brokers provide a higher-level event routing abstraction with filtering capabili
 
     - Kafka Channel
     ```bash
-    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.7/eventing-kafka-controller.yaml
-    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.7/eventing-kafka-channel.yaml
+    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.8/eventing-kafka-controller.yaml
+    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.8/eventing-kafka-channel.yaml
     ```
     - NATS Channel
     ```bash
