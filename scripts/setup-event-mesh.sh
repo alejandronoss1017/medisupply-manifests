@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Ensure running under bash (avoid /bin/sh or dash syntax errors)
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "[INFO] Re-executing with bash..."
+  exec /usr/bin/env bash "$0" "$@"
+fi
+
 # Event Mesh Setup Script (root/scripts)
 # Installs RabbitMQ operators and topology first (queues/exchanges),
 # then installs Kafka operator and a demo Kafka cluster/topics,
@@ -18,7 +24,6 @@ KN_EVENTING_VERSION="knative-v1.19.6"
 RABBIT_EVENTING_VERSION="knative-v1.19.6"           # RabbitMQ source/broker components for Knative
 
 # Kafka related versions
-STRIMZI_INSTALL_URL="https://strimzi.io/install/latest?namespace=kafka-system"  # Strimzi operator (kubectl install)
 EVENTING_KAFKA_CONTROLLER_VERSION="knative-v1.19.8" # Kafka controller + channel
 EVENTING_KAFKA_SOURCE_VERSION="knative-v1.19.8"     # kafka source
 
