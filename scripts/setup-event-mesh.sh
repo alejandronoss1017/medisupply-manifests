@@ -51,7 +51,12 @@ kubectl_wait_ns_ready() {
 
 # -------- Pre-flight checks --------
 if ! command -v kubectl >/dev/null 2>&1; then
-  err "kubectl is required but not found in PATH. Please install kubectl first."
+  err "kubectl is required but not found in PATH. Please install kubectl first: https://kubernetes.io/releases/download/"
+  exit 1
+fi
+
+if ! command -v helm >/dev/null 2>&1; then
+  err "helm is required but not found in PATH. Please install Helm first: https://helm.sh/docs/intro/install/"
   exit 1
 fi
 
