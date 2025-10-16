@@ -8,8 +8,5 @@ spec:
     attributes:
       type: medicine.updated
   subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: purchases #service name
+    uri: http://purchases.financial-billing.svc.cluster.local:8080
 

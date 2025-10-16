@@ -45,7 +45,7 @@ spec:
       containers:
         - name: purchases-web
           image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/purchases-web-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
@@ -82,7 +82,7 @@ spec:
             failureThreshold: 3
         - name: purchases-worker
           image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/purchases-worker-service:1.0.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: RABBITMQ_USER
               valueFrom:
