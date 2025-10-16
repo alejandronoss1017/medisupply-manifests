@@ -19,13 +19,13 @@ Channels are the underlying messaging infrastructure for point-to-point event de
 - NATS Streaming Channel - backed by NATS
 
 ### Broker Layer
-Brokers provide a higher-level event routing abstraction with filtering capabilities Installing, they use Triggers to route events to subscribers based on event attributes.
+Brokers provide a higher-level event routing abstraction with filtering capabilities. They use Triggers to route events to subscribers based on event attributes.
 
 #### Characteristics:
-- Event routing with filtering - uses Triggers to filter events by attributes
-- Higher-level abstraction - easier to use for complex event routing scenarios
-- Decouples producers from consumers - producers don't need to know about subscribers
-- Can use Channels underneath - some Broker implementations (like MT-Channel-Broker) use Channels as their transport layer
+- Event routing with filtering — uses Triggers to filter events by attributes
+- Higher-level abstraction — easier to use for complex event routing scenarios
+- Decouples producers from consumers — producers don't need to know about subscribers
+- Can use Channels underneath — some Broker implementations (like MT-Channel-Broker) use Channels as their transport layer
 
 #### Available implementations:
 - Kafka Broker - backed by Apache Kafka (production-ready, efficient)
@@ -84,7 +84,7 @@ Brokers provide a higher-level event routing abstraction with filtering capabili
 
     - Kafka Based Broker
     ```bash
-    kubectl apply -f kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.7/eventing-kafka-broker.yaml
+    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.7/eventing-kafka-broker.yaml
     ```
 
     - RabbitMQ Based Broker
@@ -102,7 +102,7 @@ Brokers provide a higher-level event routing abstraction with filtering capabili
     ```bash
     kubectl get pods -n knative-eventing
     ```
-## Events sources
+## Event sources
 
 Event sources are the components that send events to Knative Eventing. Knative Eventing supports a long list of event sources,
 check the [Knative Eventing documentation](https://knative.dev/docs/eventing/) for more information. For this project
@@ -130,9 +130,9 @@ kubectl apply -f https://github.com/knative/serving/releases/latest/download/ser
    kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.19.8/eventing-kafka-source.yaml
     ```
 
-3. Verify tha `kafka-controller` and `kafka-source-dispatcher` are running
+3. Verify that `kafka-controller` and `kafka-source-dispatcher` are running
     ```bash
-   kubectl get deployments.apps,statefulsets.apps -n knative-eventing
+    kubectl get deployments.apps,statefulsets.apps -n knative-eventing
     ```
 
 4. Define a kafka event source
@@ -144,16 +144,17 @@ kubectl apply -f https://github.com/knative/serving/releases/latest/download/ser
     metadata:
       name: kafka-source
     spec:
-    consumerGroup: knative-group
-    bootstrapServers:
-      - my-cluster-kafka-bootstrap.kafka:9092 # note the kafka namespace
-    topics:
-      - knative-demo-topic
-    sink:
-      ref:
-      apiVersion: serving.knative.dev/v1
-      kind: Service
-      name: event-display
+      consumerGroup: knative-group
+      bootstrapServers:
+        - my-cluster-kafka-bootstrap.kafka:9092 # note the kafka namespace
+      topics:
+        - knative-demo-topic
+      sink:
+        ref:
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          name: event-display
+          namespace: default
     ```
 
 5. Deploy the event source
@@ -164,3 +165,82 @@ kubectl apply -f https://github.com/knative/serving/releases/latest/download/ser
     ```bash
     kubectl get kafkasource kafka-source
     ```
+
+### RabbitMQ Source
+
+1. Install the RabbitMQ Broker:
+
+    ```bash
+    kubectl apply -f https://github.com/knative-extensions/eventing-rabbitmq/releases/download/knative-v1.19.6/rabbitmq-broker.yaml
+    ```
+
+2. Install the RabbitMQ Source:
+
+    ```bash
+    kubectl apply -f https://github.com/knative-extensions/eventing-rabbitmq/releases/download/knative-v1.19.6/rabbitmq-source.yaml
+    ```
+
+3. Verify that rabbitmq-controller-manager and rabbitmq-webhook are running:
+
+    ```bash
+    kubectl get deployments.apps,statefulsets.apps -n knative-eventing
+    ```
+
+4. Define a RabbitMQ event source (aligned with this repo):
+
+    ```yaml
+    apiVersion: sources.knative.dev/v1alpha1
+    kind: RabbitmqSource
+    metadata:
+      name: purchases-rabbitmq-source
+      namespace: financial-billing
+    spec:
+      rabbitmqClusterReference:
+        # Using the in-cluster RabbitMQ defined in the financial-billing namespace
+        name: financial-billing-rabbitmq
+      rabbitmqResourcesConfig:
+        parallelism: 10
+        exchangeName: "purchases.exchange"
+        queueName: "purchases.events"
+      delivery:
+        retry: 5
+        backoffPolicy: "linear"
+        backoffDelay: "PT1S"
+      sink:
+        ref:
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          name: event-display
+          namespace: default
+    ```
+
+Note: To consume from the invoices topology instead, set exchangeName to invoices.exchange and queueName to invoices.events.
+
+### Create a `event-display` service
+
+This is the service that will receive the events from the event sources.
+
+```yaml
+# event-display.yaml
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - # This corresponds to
+          # https://github.com/knative/eventing/tree/main/cmd/event_display/main.go
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+```
+
+```bash
+kubectl apply -f knative-eventing/event-display.yaml
+```
+
+Ensure that the `event-display` service is running:
+```bash
+kubectl get pods
+```
