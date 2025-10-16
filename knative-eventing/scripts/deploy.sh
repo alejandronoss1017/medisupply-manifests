@@ -23,7 +23,7 @@ echo "🛠️  Deploying services..."
 # Procurement Supply Optimization
 kubectl apply -f ../procurement-supply-optimization/kafka.yaml
 kubectl apply -f ../procurement-supply-optimization/supplier.yaml
-kubectl apply -f ../procurement-supply-optimization/purchase-plan.yaml
+kubectl apply -f ../procurement-supply-optimization/purchase-plans.yaml
 kubectl apply -f ../procurement-supply-optimization/contracts.yaml
 
 # Commerce Sales
