@@ -2,7 +2,6 @@ apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
   name: purchase-trigger
-  namespace: medisupply-eventing
 spec:
   broker: medisupply-broker
   filter:

@@ -2,7 +2,6 @@ apiVersion: eventing.knative.dev/v1
 kind: Broker
 metadata:
   name: medisupply-broker
-  namespace: medisupply-eventing
   annotations:
     eventing.knative.dev/broker.class: MTChannelBasedBroker
 spec:
