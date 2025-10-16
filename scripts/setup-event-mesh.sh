@@ -161,11 +161,18 @@ kubectl apply -f "https://github.com/knative-extensions/eventing-kafka-broker/re
 # Wait again after installing RabbitMQ & Kafka controllers
 kubectl_wait_ns_ready knative-eventing
 
-# -------- 11) Deploy an event receiver (Knative Service event-display) --------
+# -------- 11) Deploy Knative Broker --------
+info "Deploying Knative Broker (knative-eventing/broker.yaml)..."
+kubectl apply -f "$REPO_ROOT/knative-eventing/broker.yaml"
+
+info "Waiting for Broker to be Ready..."
+kubectl wait --for=condition=Ready --timeout=300s broker/medisupply-broker -n default || true
+
+# -------- 12) Deploy an event receiver (Knative Service event-display) --------
 info "Deploying event receiver service (knative-eventing/event-display.yaml)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/event-display.yaml"
 
-# -------- 12) Apply sources aligned with this repo --------
+# -------- 13) Apply sources aligned with this repo --------
 info "Deploying RabbitmqSource (financial-billing namespace)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
 
@@ -193,6 +200,7 @@ echo "- Kafka data plane applied under namespace: $PSO_NAMESPACE (cluster: event
 echo "- Knative Eventing installed with: InMemoryChannel and MT-Channel-Broker."
 echo "- Knative RabbitMQ components (source + broker) installed."
 echo "- Knative Kafka components (source + controller) installed."
+echo "- Knative Broker 'medisupply-broker' deployed in namespace: default (MTChannelBasedBroker)."
 echo "- RabbitMQ and Kafka sources applied (RabbitmqSource in $FIN_NAMESPACE, KafkaSource in $PSO_NAMESPACE)."
 echo "- Event receiver (event-display) deployed in namespace: default."
 
