@@ -153,6 +153,9 @@ info "Installing Knative serving CRDs (Latest)..."
 kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
 kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-core.yaml
 
+# Wait for knative-serving system to be ready
+kubectl_wait_ns_ready knative-serving
+
 # -------- 9) Install RabbitMQ Eventing components (Source + Broker) --------
 info "Installing Knative Eventing RabbitMQ components ($RABBIT_EVENTING_VERSION)..."
 kubectl apply -f "https://github.com/knative-extensions/eventing-rabbitmq/releases/download/${RABBIT_EVENTING_VERSION}/rabbitmq-source.yaml"
