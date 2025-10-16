@@ -3,8 +3,6 @@ kind: KafkaSource
 metadata:
   name: procurement-supply-optimization-kafka-source
   namespace: procurement-supply-optimization
-  labels:
-    role: title
 spec:
   consumerGroup: knative-group
   bootstrapServers:
