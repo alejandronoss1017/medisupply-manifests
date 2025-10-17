@@ -117,7 +117,12 @@ kubectl create secret generic invoices-app-queue-user-credentials --from-literal
 # 5. Deploy namespaces and services
 kubectl label namespace default istio-injection=enabled
 kubectl apply -f namespaces.yaml
-kubectl apply -k commerce-sales/
+
+# Create Postgres auth secret used by commerce-sales (edit values as needed)
+kubectl apply -n commerce-sales -f commerce-sales/postgres/pg-auth.secret.yaml
+# Deploy commerce-sales (renders Helm chart via Kustomize)
+kubectl kustomize commerce-sales --enable-helm | kubectl apply -f -
+
 kubectl apply -k inventories-storage/
 kubectl apply -k logistics-distributions/
 kubectl apply -k regulatory-health-compliance/
@@ -277,8 +282,11 @@ kubectl apply -f namespaces.yaml
 ### Step 8: Deploy MediSupply Services
 
 ```bash
-# Deploy Commerce Sales domain services
-kubectl apply -k commerce-sales/
+# Deploy Commerce Sales domain services (PostgreSQL via Helm-in-Kustomize)
+# 1) Create the Postgres secret (contains postgres-password, password, replication-password)
+kubectl apply -n commerce-sales -f commerce-sales/postgres/pg-auth.secret.yaml
+# 2) Apply the overlay rendering Helm with Kustomize
+kubectl kustomize commerce-sales --enable-helm | kubectl apply -f -
 
 # Deploy Inventories Storage domain services
 kubectl apply -k inventories-storage/

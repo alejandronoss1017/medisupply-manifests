@@ -5,3 +5,15 @@ resources:
   - security.yaml
   - sales.yaml
   - ../common/aws-credentials
+  # DB:
+  - istio/authz-postgres.yaml
+  - postgres/pg-auth.secret.yaml
+
+# Render the Bitnami PostgreSQL chart with Kustomize
+helmCharts:
+  - name: postgresql
+    releaseName: pg
+    repo: https://charts.bitnami.com/bitnami
+    version: 15.5.17
+    namespace: commerce-sales
+    valuesFile: postgres/values.yaml

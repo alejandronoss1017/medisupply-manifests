@@ -1,0 +1,35 @@
+architecture: replication
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/postgresql
+  # Elige un tag que exista en el repo legacy (ejemplos de formato):
+  # tag: "16.4.0-debian-12-r1"
+  # o, si necesitas salir del paso hoy mismo:
+  tag: "16"     # menos estricto; luego fija uno exacto
+  pullPolicy: IfNotPresent
+
+auth:
+  existingSecret: pg-auth
+  username: app_user
+  database: salesdb
+
+primary:
+  persistence:
+    size: 10Gi
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+readReplicas:
+  replicaCount: 1
+  persistence:
+    size: 10Gi
+
+networkPolicy:
+  enabled: true
+  allowExternal: false
