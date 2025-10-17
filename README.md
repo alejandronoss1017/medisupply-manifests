@@ -398,9 +398,18 @@ Once deployed, the services expose RESTful APIs:
 ### Example API Calls
 
 ```bash
+
 # Commerce Sales
-curl http://localhost:8080/api/v1/sales
-curl http://localhost:8080/api/v1/sales/health
+curl -i http://localhost:3000/health
+
+Write path → PRIMARY: inserts a row into Postgres
+curl -i -X POST http://localhost:3000/register-sale
+
+-H 'content-type: application/json'
+-d '{"sku":"SKU-4345342","amount":3}'
+
+Read path → REPLICA (fallback to primary if needed)
+curl -s 'http://localhost:3000/sales?limit=10'
 
 # Inventories Storage
 curl http://localhost:8080/api/v1/batches

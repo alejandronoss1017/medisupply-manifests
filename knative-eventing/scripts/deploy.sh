@@ -18,10 +18,10 @@ kubectl apply -f  broker.yaml
 
 # Wait for broker to be ready
 echo "⏳ Waiting for broker to be ready..."
-kubectl wait --for=condition=Ready --timeout=60s broker/medisupply-broker -n medisupply-eventing
+kubectl wait --for=condition=Ready --timeout=60s broker/medisupply-broker
 
-kubectl apply -f triggers/purchase-trigger.yaml -n medisupply-eventing
-kubectl apply -f triggers/sales-trigger.yaml -n medisupply-eventing
+kubectl apply -f triggers/purchase-trigger.yaml
+kubectl apply -f triggers/sales-trigger.yaml
 # Deploy services
 echo "🛠️  Deploying services..."
 
@@ -33,8 +33,8 @@ kubectl apply -f ../procurement-supply-optimization/contracts.yaml -n procuremen
 
 # Commerce Sales
 kubectl apply -n commerce-sales -f ../commerce-sales/postgres/pg-auth.secret.yaml
-kubectl apply -f ../commerce-sales/sales.yaml -n commerce-sales
-#kubectl kustomize ../commerce-sales --enable-helm | kubectl apply -f -
+#kubectl apply -f ../commerce-sales/sales.yaml -n commerce-sales
+kubectl kustomize ../commerce-sales --enable-helm | kubectl apply -f -
 
 
 # Financial Billing
