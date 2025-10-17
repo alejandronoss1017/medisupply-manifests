@@ -21,11 +21,14 @@ CERT_MANAGER_VERSION="v1.5.4"
 RABBITMQ_TOPOLOGY_OPERATOR_VERSION="v1.17.4"
 
 KN_EVENTING_VERSION="knative-v1.19.6"
+KN_SERVING_VERSION="latest"                         # Knative Serving CRDs and core
+KN_NET_ISTIO_VERSION="latest"                       # Knative Istio networking layer
 RABBIT_EVENTING_VERSION="knative-v1.19.6"           # RabbitMQ source/broker components for Knative
 
 # Kafka related versions
 EVENTING_KAFKA_CONTROLLER_VERSION="knative-v1.19.8" # Kafka controller + channel
 EVENTING_KAFKA_SOURCE_VERSION="knative-v1.19.8"     # kafka source
+EVENTING_KAFKA_BROKER_VERSION="knative-v1.19.8"     # Kafka broker components
 
 # Namespaces
 FIN_NAMESPACE="financial-billing"
@@ -105,7 +108,11 @@ success "RabbitMQ operators and topology applied."
 # -------- 4) Install Kafka operator (Strimzi) --------
 
 info "Adding the official Strimzi Helm chart repository and update the local cache..."
-helm repo add strimzi https://strimzi.io/charts
+if helm repo list | grep -q "^strimzi"; then
+  info "Strimzi repository already exists; skipping 'helm repo add'."
+else
+  helm repo add strimzi https://strimzi.io/charts
+fi
 helm repo update
 
 info "Ensuring Strimzi Kafka Operator is installed in namespace $KAFKA_SYSTEM_NS ..."
@@ -132,69 +139,110 @@ kubectl wait --for=condition=Ready --timeout=900s statefulset/events-cluster-kaf
 info "Applying Kafka topics (procurement-supply-optimization/topics.yaml)..."
 kubectl apply -f "$REPO_ROOT/procurement-supply-optimization/topics.yaml"
 
-# -------- 6) Install Knative Eventing (CRDs + Core) --------
+success "Kafka operator and cluster configured."
+
+# -------- 6) Install Knative Serving (CRDs + Core) --------
+info "Installing Knative Serving CRDs and core ($KN_SERVING_VERSION)..."
+kubectl apply -f "https://github.com/knative/serving/releases/${KN_SERVING_VERSION}/download/serving-crds.yaml"
+kubectl apply -f "https://github.com/knative/serving/releases/${KN_SERVING_VERSION}/download/serving-core.yaml"
+
+# Wait for knative-serving system to be ready
+kubectl_wait_ns_ready knative-serving
+
+success "Knative Serving installed."
+
+# -------- 7) Install Knative Istio Networking Layer --------
+info "Installing Knative Istio networking layer (net-istio $KN_NET_ISTIO_VERSION)..."
+kubectl apply -f "https://github.com/knative/net-istio/releases/${KN_NET_ISTIO_VERSION}/download/net-istio.yaml"
+
+# Wait for net-istio components
+info "Waiting for net-istio components to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/net-istio-controller -n knative-serving || true
+kubectl wait --for=condition=available --timeout=300s deployment/net-istio-webhook -n knative-serving || true
+
+# Configure Knative to use Istio as ingress
+info "Configuring Knative Serving to use Istio as the default ingress class..."
+kubectl patch configmap/config-network -n knative-serving --type merge -p '{"data":{"ingress-class":"istio.ingress.networking.knative.dev"}}'
+
+success "Knative configured to use Istio networking."
+
+# -------- 8) Install Knative Eventing (CRDs + Core) --------
 info "Installing Knative Eventing CRDs and core ($KN_EVENTING_VERSION)..."
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${KN_EVENTING_VERSION}/eventing-crds.yaml"
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${KN_EVENTING_VERSION}/eventing-core.yaml"
 
-# -------- 7) Install InMemoryChannel (development only) --------
+# -------- 9) Install InMemoryChannel (development only) --------
 info "Installing InMemoryChannel ($KN_EVENTING_VERSION)..."
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${KN_EVENTING_VERSION}/in-memory-channel.yaml"
 
-# -------- 8) Install MT-Channel-Broker --------
+# -------- 10) Install MT-Channel-Broker --------
 info "Installing MT-Channel-Broker ($KN_EVENTING_VERSION)..."
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${KN_EVENTING_VERSION}/mt-channel-broker.yaml"
 
 # Wait for knative-eventing system to be ready
 kubectl_wait_ns_ready knative-eventing
 
-# -------- 10) Install Knative serving CRDs and Core --------
-info "Installing Knative serving CRDs (Latest)..."
-kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
-kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-core.yaml
-
-# Wait for knative-serving system to be ready
-kubectl_wait_ns_ready knative-serving
-
-# -------- 9) Install RabbitMQ Eventing components (Source + Broker) --------
+# -------- 11) Install RabbitMQ Eventing components (Source + Broker) --------
 info "Installing Knative Eventing RabbitMQ components ($RABBIT_EVENTING_VERSION)..."
 kubectl apply -f "https://github.com/knative-extensions/eventing-rabbitmq/releases/download/${RABBIT_EVENTING_VERSION}/rabbitmq-source.yaml"
 kubectl apply -f "https://github.com/knative-extensions/eventing-rabbitmq/releases/download/${RABBIT_EVENTING_VERSION}/rabbitmq-broker.yaml"
 
-# -------- 10) Install Kafka Eventing components (Source + Broker) --------
-info "Installing Knative Eventing Kafka components (Eventing controller ${EVENTING_KAFKA_CONTROLLER_VERSION}, controller ${EVENTING_KAFKA_CONTROLLER_VERSION})..."
+# -------- 12) Install Kafka Eventing components (Source + Controller + Broker) --------
+info "Installing Knative Eventing Kafka components..."
+info "  - Kafka Source ($EVENTING_KAFKA_SOURCE_VERSION)"
 kubectl apply -f "https://github.com/knative-extensions/eventing-kafka-broker/releases/download/${EVENTING_KAFKA_SOURCE_VERSION}/eventing-kafka-source.yaml"
+
+info "  - Kafka Controller ($EVENTING_KAFKA_CONTROLLER_VERSION)"
 kubectl apply -f "https://github.com/knative-extensions/eventing-kafka-broker/releases/download/${EVENTING_KAFKA_CONTROLLER_VERSION}/eventing-kafka-controller.yaml"
+
+info "  - Kafka Broker ($EVENTING_KAFKA_BROKER_VERSION)"
+kubectl apply -f "https://github.com/knative-extensions/eventing-kafka-broker/releases/download/${EVENTING_KAFKA_BROKER_VERSION}/eventing-kafka-broker.yaml"
+
+# Wait for kafka-broker-receiver
+info "Waiting for Kafka broker receiver to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/kafka-broker-receiver -n knative-eventing || true
 
 # Wait again after installing RabbitMQ & Kafka controllers
 kubectl_wait_ns_ready knative-eventing
 
-# -------- 11) Deploy Knative Broker --------
+# -------- 13) Restart kafka-source-dispatcher (if exists) --------
+if kubectl get statefulset kafka-source-dispatcher -n knative-eventing >/dev/null 2>&1; then
+  info "Restarting kafka-source-dispatcher to pick up new configuration..."
+  kubectl rollout restart statefulset/kafka-source-dispatcher -n knative-eventing
+  kubectl rollout status statefulset/kafka-source-dispatcher -n knative-eventing --timeout=120s || true
+else
+  info "kafka-source-dispatcher not found; skipping restart."
+fi
+
+success "Kafka eventing components installed."
+
+# -------- 14) Deploy Knative Broker --------
 info "Deploying Knative Broker (knative-eventing/broker.yaml)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/broker.yaml"
 
 info "Waiting for Broker to be Ready..."
 kubectl wait --for=condition=Ready --timeout=300s broker/medisupply-broker -n default || true
 
-# -------- 12) Deploy an event receiver (Knative Service event-display) --------
+# -------- 15) Deploy an event receiver (Knative Service event-display) --------
 info "Deploying event receiver service (knative-eventing/event-display.yaml)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/event-display.yaml"
 
-# -------- 13) Apply sources aligned with this repo --------
-info "Deploying RabbitmqSource (financial-billing namespace)..."
-kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
+# -------- 16) Apply sources aligned with this repo --------
 
 info "Deploying KafkaSource (procurement-supply-optimization namespace)..."
 kubectl apply -f "$REPO_ROOT/knative-eventing/sources/kafka.yaml"
 
-# Wait for sources to be Ready (best-effort)
-info "Waiting for RabbitmqSource to be Ready..."
-kubectl wait --for=condition=Ready --timeout=300s rabbitmqsource/purchases-rabbitmq-source -n "$FIN_NAMESPACE" || true
+info "Deploying RabbitmqSource (financial-billing namespace)..."
+kubectl apply -f "$REPO_ROOT/knative-eventing/sources/rabbitmq.yaml"
 
+# Wait for sources to be Ready (best-effort)
 info "Waiting for KafkaSource to be Ready..."
 kubectl wait --for=condition=Ready --timeout=300s kafkasource/procurement-supply-optimization-kafka-source -n $PSO_NAMESPACE || true
 
-success "Knative Eventing with InMemoryChannel, MT-Channel-Broker, plus RabbitMQ and Kafka components installed."
+info "Waiting for RabbitmqSource to be Ready..."
+kubectl wait --for=condition=Ready --timeout=300s rabbitmqsource/purchases-rabbitmq-source -n "$FIN_NAMESPACE" || true
+
+success "Knative Eventing and Serving fully configured with Istio networking."
 
 # -------- Summary --------
 info "Summary:"
@@ -205,16 +253,17 @@ echo "  * purchases-app-queue-user-credentials (username: purchases-app password
 echo "  * invoices-app-queue-user-credentials (username: invoices-app password: supersecret)"
 echo "- Kafka operator (Strimzi) installed in namespace: $KAFKA_SYSTEM_NS."
 echo "- Kafka data plane applied under namespace: $PSO_NAMESPACE (cluster: events-cluster)."
+echo "- Knative Serving installed with Istio networking layer."
 echo "- Knative Eventing installed with: InMemoryChannel and MT-Channel-Broker."
 echo "- Knative RabbitMQ components (source + broker) installed."
-echo "- Knative Kafka components (source + controller) installed."
+echo "- Knative Kafka components (source + controller + broker) installed."
 echo "- Knative Broker 'medisupply-broker' deployed in namespace: default (MTChannelBasedBroker)."
 echo "- RabbitMQ and Kafka sources applied (RabbitmqSource in $FIN_NAMESPACE, KafkaSource in $PSO_NAMESPACE)."
 echo "- Event receiver (event-display) deployed in namespace: default."
 
 # -------- Quick status --------
 info "Quick status (pods in key namespaces):"
-for ns in cert-manager rabbitmq-system knative-eventing "$FIN_NAMESPACE" "$KAFKA_SYSTEM_NS" "$PSO_NAMESPACE"; do
+for ns in cert-manager rabbitmq-system knative-serving knative-eventing "$FIN_NAMESPACE" "$KAFKA_SYSTEM_NS" "$PSO_NAMESPACE"; do
   echo "--- Namespace: $ns ---"
   kubectl get pods -n "$ns" || true
   echo ""
