@@ -44,7 +44,7 @@ spec:
       serviceAccountName: medisupply-sales
       containers:
       - name: sales
-        image: public.ecr.aws/q2b4w2e6/dummies/venta-ms:1.4.0
+        image: public.ecr.aws/a7x9j8u1/medisupply/commerce-sales/sales-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

@@ -43,53 +43,53 @@ spec:
     spec:
       serviceAccountName: medisupply-invoices
       containers:
-        - name: invoices-web
-          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-web-service:1.0.0
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 8080
-          env:
-            - name: PORT
-              value: "8080"
-            - name: RABBITMQ_USER
-              valueFrom:
-                secretKeyRef:
-                  name: invoices-app-queue-user-credentials
-                  key: username
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: invoices-app-queue-user-credentials
-                  key: password
-            # Use FQDN (Fully Qualified Domain Name)
-            - name: RABBITMQ_HOST
-              value: rabbitmq.financial-billing.svc.cluster.local
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
-          livenessProbe:
-            httpGet:
-              path: /ping
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /ping
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 3
+        # - name: invoices-web
+        #   image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-web-service:latest
+        #   imagePullPolicy: Always
+        #   ports:
+        #     - containerPort: 8080
+        #   env:
+        #     - name: PORT
+        #       value: "8080"
+        #     - name: RABBITMQ_USER
+        #       valueFrom:
+        #         secretKeyRef:
+        #           name: invoices-app-queue-user-credentials
+        #           key: username
+        #     - name: RABBITMQ_PASSWORD
+        #       valueFrom:
+        #         secretKeyRef:
+        #           name: invoices-app-queue-user-credentials
+        #           key: password
+        #     # Use FQDN (Fully Qualified Domain Name)
+        #     - name: RABBITMQ_HOST
+        #       value: rabbitmq.financial-billing.svc.cluster.local
+        #   resources:
+        #     requests:
+        #       memory: "128Mi"
+        #       cpu: "100m"
+        #     limits:
+        #       memory: "256Mi"
+        #       cpu: "200m"
+        #   livenessProbe:
+        #     httpGet:
+        #       path: /ping
+        #       port: 8080
+        #     initialDelaySeconds: 10
+        #     periodSeconds: 10
+        #     timeoutSeconds: 5
+        #     failureThreshold: 3
+        #   readinessProbe:
+        #     httpGet:
+        #       path: /ping
+        #       port: 8080
+        #     initialDelaySeconds: 5
+        #     periodSeconds: 5
+        #     timeoutSeconds: 3
+        #     failureThreshold: 3
         - name: invoices-worker
-          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-worker-service:1.0.0
-          imagePullPolicy: IfNotPresent
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-worker-service:latest
+          imagePullPolicy: Always
           env:
             - name: RABBITMQ_USER
               valueFrom:

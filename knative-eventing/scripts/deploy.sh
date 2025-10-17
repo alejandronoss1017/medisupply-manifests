@@ -14,7 +14,7 @@ kubectl create namespace financial-billing --dry-run=client -o yaml | kubectl ap
 # Deploy broker
 echo "🔧 Creating event broker..."
 kubectl apply -f  broker.yaml
-
+#kubectl apply -k ../common/aws-credentials/
 
 # Wait for broker to be ready
 echo "⏳ Waiting for broker to be ready..."
@@ -32,7 +32,9 @@ kubectl apply -f ../procurement-supply-optimization/purchase-plans.yaml -n procu
 kubectl apply -f ../procurement-supply-optimization/contracts.yaml -n procurement-supply-optimization
 
 # Commerce Sales
+kubectl apply -n commerce-sales -f ../commerce-sales/postgres/pg-auth.secret.yaml
 kubectl apply -f ../commerce-sales/sales.yaml -n commerce-sales
+#kubectl kustomize ../commerce-sales --enable-helm | kubectl apply -f -
 
 
 # Financial Billing
