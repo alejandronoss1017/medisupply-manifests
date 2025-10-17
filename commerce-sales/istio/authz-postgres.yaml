@@ -1,0 +1,19 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-db-traffic
+  namespace: commerce-sales
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/commerce-sales/sa/medisupply-sales
+              - cluster.local/ns/commerce-sales/sa/pg-postgresql
+      to:
+        - operation:
+            ports: ["5432"]

@@ -1,14 +1,14 @@
 ##################################################################################################
 # Namespaces for MediSupply Microservices
 ##################################################################################################
-#apiVersion: v1
-#kind: Namespace
-#metadata:
-#  name: commerce-sales
-#  labels:
-#    istio-injection: enabled
-#    app.kubernetes.io/name: medisupply
-#    app.kubernetes.io/component: commerce-sales
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: commerce-sales
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/name: medisupply
+    app.kubernetes.io/component: commerce-sales
 #---
 #apiVersion: v1
 #kind: Namespace
@@ -37,20 +37,20 @@
 #    app.kubernetes.io/name: medisupply
 #    app.kubernetes.io/component: regulatory-health-compliance
 #---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: financial-billing
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: financial-billing
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: procurement-supply-optimization
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: procurement-supply-optimization
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: financial-billing
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: financial-billing
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: procurement-supply-optimization
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: procurement-supply-optimization
