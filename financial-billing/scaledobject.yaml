@@ -34,9 +34,9 @@ spec:
   scaleTargetRef:
     name: purchases-v1
   minReplicaCount: 1
-  maxReplicaCount: 2
+  maxReplicaCount: 5
   pollingInterval: 15  # Check metrics every 15 seconds
-  cooldownPeriod: 120  # Wait 2 minutes after last trigger before scaling down
+  cooldownPeriod: 15  # Wait 1 minute after last trigger before scaling down
 
   triggers:
     # 1. HTTP Request Rate Trigger using Prometheus
@@ -55,14 +55,28 @@ spec:
         threshold: "10"
         # Activate scaling when query returns a value (even if below threshold)
         activationThreshold: "0"
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: invoices-scaler
+  namespace: financial-billing
+spec:
+  scaleTargetRef:
+    name: invoices-v1
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 15  # Check metrics every 15 seconds
+  cooldownPeriod: 15  # Wait 1 minute after last trigger before scaling down
 
-    # 2. RabbitMQ Queue Length Trigger
-    - type: rabbitmq
-      metadata:
-        protocol: amqp
-        queueName: purchases.events
-        mode: QueueLength
-        value: "5"  # Scale when queue has more than 5 messages
-        activationValue: "0"  # Activate when queue has any messages
-      authenticationRef:
-        name: keda-trigger-auth-rabbitmq-conn
+  # RabbitMQ Queue Length Trigger
+  triggers:
+      - type: rabbitmq
+        metadata:
+          protocol: amqp
+          queueName: purchases.events
+          mode: QueueLength
+          value: "5"  # Scale when queue has more than 5 messages
+          activationValue: "0"  # Activate when queue has any messages
+        authenticationRef:
+          name: keda-trigger-auth-rabbitmq-conn
