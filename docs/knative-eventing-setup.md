@@ -138,7 +138,7 @@ kubectl apply -f https://github.com/knative/serving/releases/latest/download/ser
 4. Define a kafka event source
 
     ```yaml
-    # event-source.yaml
+    # kafka.yaml
     apiVersion: sources.knative.dev/v1
     kind: KafkaSource
     metadata:
@@ -159,7 +159,7 @@ kubectl apply -f https://github.com/knative/serving/releases/latest/download/ser
 
 5. Deploy the event source
     ```bash
-    kubectl apply -f event-source.yaml
+    kubectl apply -f kafka.yaml
     ```
 6. Verify the Kafka source is ready:
     ```bash
