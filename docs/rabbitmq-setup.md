@@ -37,6 +37,9 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 ```
 
 **Note**: Wait for cert-manager to be fully ready before proceeding to the next step.
+```bash
+kubectl wait --for=condition=available --timeout=300s deployment --all -n cert-manager
+```
 
 ### 3. Install RabbitMQ Messaging Topology Operator
 

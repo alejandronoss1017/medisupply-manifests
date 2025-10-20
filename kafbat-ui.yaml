@@ -9,7 +9,7 @@ data:
     kafka:
       clusters:
         - name: my-cluster
-          bootstrapServers: my-cluster-kafka-bootstrap.purchasing-supply-optimization.svc.cluster.local:9092
+          bootstrapServers: events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
           properties: {}
     auth:
       type: disabled

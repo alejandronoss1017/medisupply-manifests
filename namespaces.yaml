@@ -9,48 +9,48 @@ metadata:
     istio-injection: enabled
     app.kubernetes.io/name: medisupply
     app.kubernetes.io/component: commerce-sales
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: inventories-storage
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: inventories-storage
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: logistics-distributions
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: logistics-distributions
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: regulatory-health-compliance
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: regulatory-health-compliance
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: financial-billing
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: financial-billing
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: purchasing-supply-optimization
-  labels:
-    istio-injection: enabled
-    app.kubernetes.io/name: medisupply
-    app.kubernetes.io/component: purchasing-supply-optimization
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: inventories-storage
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: inventories-storage
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: logistics-distributions
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: logistics-distributions
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: regulatory-health-compliance
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: regulatory-health-compliance
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: financial-billing
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: financial-billing
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: procurement-supply-optimization
+#  labels:
+#    istio-injection: enabled
+#    app.kubernetes.io/name: medisupply
+#    app.kubernetes.io/component: procurement-supply-optimization

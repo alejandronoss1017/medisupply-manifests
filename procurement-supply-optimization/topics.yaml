@@ -1,9 +1,9 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
-  name: updated.med
+  name: medicine.events
   namespace: procurement-supply-optimization
   labels:
-    strimzi.io/cluster: my-cluster
+    strimzi.io/cluster: events-cluster
 spec:
-  topicName: updated.med
+  topicName: medicine.events

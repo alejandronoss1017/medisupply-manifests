@@ -1,0 +1,17 @@
+apiVersion: sources.knative.dev/v1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+  namespace: default
+spec:
+  consumerGroup: knative-group
+  bootstrapServers:
+  - events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
+  topics:
+  - medicine.events
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: medisupply-broker
+      namespace: default
