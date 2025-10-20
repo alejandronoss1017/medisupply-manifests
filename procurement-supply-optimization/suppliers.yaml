@@ -5,69 +5,56 @@ apiVersion: v1
 kind: Service
 metadata:
   name: suppliers-service
+  namespace: procurement-supply-optimization
+
   labels:
     app: suppliers-service
     service: suppliers-service
 spec:
   ports:
-  - port: 3000
-    name: http
+    - port: 8080
+      name: http
   selector:
-    app: suppliers-service
+    app: suppliers
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: medisupply-suppliers-service
-  labels:
-    account: suppliers-service
----
+##################################################################################################
+# suppliers deployment
+##################################################################################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: suppliers-service-v1
+  name: suppliers
+  namespace: procurement-supply-optimization
   labels:
-    app: suppliers-service
-    version: v1
+    app: suppliers
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: suppliers-service
-      version: v1
+      app: suppliers
   template:
     metadata:
+      name: suppliers
       labels:
-        app: suppliers-service
-        version: v1
+        app: suppliers
     spec:
-      serviceAccountName: medisupply-suppliers-service
-
       containers:
-      - name: suppliers-service
-        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers-web-service:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-        env:
-          - name: SERVICE_NAME
-            value: "Supplier Service"
-          - name: KAFKA_BROKERS
-            value: "events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
-          - name: KAFKA_CLIENT_ID
-            value: "suppliers-service"
-          - name: PORT
-            value: "3000"
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 2
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-
+        - name: suppliers
+          image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers/web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_HOST
+              value: events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
+            - name: KAFKA_TOPIC
+              value: medicine.events
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+      restartPolicy: Always
