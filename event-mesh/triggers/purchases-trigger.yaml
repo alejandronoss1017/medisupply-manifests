@@ -1,0 +1,15 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: purchases-trigger
+  namespace: default
+spec:
+  broker: medisupply-broker
+  # filter:
+    # attributes:
+      # type: com.example.purchase.created
+      # You can add more filters:
+      # source: /kafka/purchases
+      # subject: order
+  subscriber:
+    uri: http://purchases-service.financial-billing.svc.cluster.local:8080/events
