@@ -1,4 +1,4 @@
-# 🏥 MediSupply - Medical Supply Chain Management Platform
+# 🏥 MediSupply — Medical Supply Chain Management Platform
 
 > A cloud-native microservices platform for managing medical supply chains with advanced inventory tracking, regulatory compliance, and distribution logistics.
 
@@ -10,7 +10,7 @@
 ## 📑 Table of Contents
 
 - [Overview](#-overview)
-- [Architecture](#️-architecture)
+- [Architecture](#-architecture)
 - [Services & Namespaces](#-services--namespaces)
 - [Key Features](#-key-features)
 - [Prerequisites](#-prerequisites)
@@ -20,7 +20,7 @@
 - [API Documentation](#-api-documentation)
 - [Monitoring and Observability](#-monitoring-and-observability)
 - [Troubleshooting](#-troubleshooting)
-- [Architecture Benefits](#️-architecture-benefits)
+- [Architecture Benefits](#-architecture-benefits)
 - [Security Best Practices](#-security-best-practices)
 - [License](#-license)
 
@@ -28,7 +28,7 @@
 
 MediSupply is a comprehensive microservices-based platform designed to manage complex medical supply chains. It provides real-time inventory tracking, regulatory compliance monitoring, and optimized distribution logistics across multiple distribution centers.
 
-### 🏗️ Architecture
+### 🏗 Architecture
 
 The platform follows a domain-driven microservices architecture with services organized across multiple namespaces for better isolation and management:
 
@@ -59,16 +59,16 @@ The platform follows a domain-driven microservices architecture with services or
 
 ### 🚀 Key Features
  
-- 📦 **Real-time Inventory Management** - Track medical supplies across multiple locations with live updates
-- 🔄 **Batch Tracking** - Monitor expiration dates, lot numbers, and batch information for regulatory compliance
-- 🚛 **Logistics Optimization** - Efficient trip planning, route optimization, and delivery coordination
-- ⚖️ **Regulatory Compliance** - Automated compliance monitoring and reporting for healthcare regulations
-- 🚨 **Alert System** - Proactive notifications for critical events (expiration, low stock, compliance issues)
-- 💰 **Sales & Billing Management** - Comprehensive order processing, transaction management, and financial billing
-- 📨 **Asynchronous Messaging** - RabbitMQ-powered message queues for reliable inter-service communication
-- 🔒 **mTLS Security** - End-to-end encryption between all services via Istio service mesh
-- 🎯 **Domain Isolation** - Services organized by business domain in separate namespaces for security and scalability
-- 📊 **Distributed Tracing** - Full observability with Jaeger, Kiali, Grafana, and Prometheus integration
+- 📦 **Real-time Inventory Management**: Track medical supplies across multiple locations with live updates
+- 🔄 **Batch Tracking**: Monitor expiration dates, lot numbers, and batch information for regulatory compliance
+- 🚛 **Logistics Optimization**: Efficient trip planning, route optimization, and delivery coordination
+- ⚖️ **Regulatory Compliance**: Automated compliance monitoring and reporting for healthcare regulations
+- 🚨 **Alert System**: Proactive notifications for critical events (expiration, low stock, compliance issues)
+- 💰 **Sales & Billing Management**: Comprehensive order processing, transaction management, and financial billing
+- 📨 **Asynchronous Messaging**: RabbitMQ-powered message queues for reliable inter-service communication
+- 🔒 **mTLS Security**: End-to-end encryption between all services via Istio service mesh
+- 🎯 **Domain Isolation**: Services organized by business domain in separate namespaces for security and scalability
+- 📊 **Distributed Tracing**: Full observability with Jaeger, Kiali, Grafana, and Prometheus integration
 
 ## 📋 Prerequisites
 
@@ -84,8 +84,8 @@ Before installing MediSupply, ensure you have the following tools and requiremen
 
 ### Cloud Requirements (Optional)
 
-- **AWS Account** - Required for DynamoDB integration (with valid credentials)
-- **Container Registry Access** - For pulling microservice images
+- **AWS Account**: Required for DynamoDB integration (with valid credentials)
+- **Container Registry Access**: For pulling microservice images
 
 ### Supported Kubernetes Distributions
 
@@ -310,7 +310,7 @@ kubectl apply -k purchasing-supply-optimization/
 kubectl apply -f gateway.yaml -n default
 ```
 
-### Step 10: Change the services type to ClusterIP by annotating the gateway
+### Step 10: Change the service type to ClusterIP by annotating the gateway
 
 ```bash
 kubectl annotate gateway medisupply-gateway networking.istio.io/service-type=ClusterIP --namespace=default
@@ -598,7 +598,7 @@ kubectl describe rabbitmqcluster medisupply-rabbitmq -n financial-billing
 
 ### RabbitMQ-Specific Issues
 
-**RabbitMQ pods not starting:**
+**RabbitMQ pods don't start:**
 ```bash
 # Check RabbitMQ operator status
 kubectl get pods -n rabbitmq-system
@@ -659,7 +659,7 @@ kubectl create secret generic purchases-app-queue-user-credentials \
 
 7. ✅ **Implement RBAC** (Role-Based Access Control) to control access to namespace resources
 8. ✅ **Use PodSecurityStandards** (PSS) to enforce security policies on pods
-9. ✅ **Principle of least privilege** - Grant minimum necessary permissions
+9. ✅ **Principle of the least privilege** Grant minimum necessary permissions
 
 ### Secrets Management
 
@@ -689,7 +689,7 @@ Please ensure your code follows the existing patterns and includes appropriate d
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
 
 ---
 
