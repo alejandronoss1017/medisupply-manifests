@@ -1,0 +1,81 @@
+##################################################################################################
+# invoices service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoices
+  labels:
+    app: invoices
+    service: invoices
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: invoices
+---
+##################################################################################################
+# invoices service account
+##################################################################################################
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-invoices
+  labels:
+    account: invoices
+---
+##################################################################################################
+# invoices deployment
+##################################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoices-v1
+  labels:
+    app: invoices
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoices
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: invoices
+        version: v1
+    spec:
+      serviceAccountName: medisupply-invoices
+      containers:
+        - name: invoices-worker
+          image: public.ecr.aws/a7x9j8u1/medisupply/financial-billing/invoices-worker-service:latest
+          imagePullPolicy: Always
+          env:
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: invoices-app-queue-user-credentials
+                  key: password
+            # Use FQDN (Fully Qualified Domain Name)
+            - name: RABBITMQ_HOST
+              value: rabbitmq.financial-billing.svc.cluster.local
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          # Liveness probe using TCP socket
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

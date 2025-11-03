@@ -1,0 +1,82 @@
+##################################################################################################
+# KEDA ScaledObject for purchases microservice
+# Scales based on multiple triggers:
+# 1. HTTP request rate using Istio/Prometheus metrics
+# 2. RabbitMQ queue depth for purchases.events queue
+##################################################################################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keda-rabbitmq-secret
+  namespace: financial-billing
+type: Opaque
+stringData:
+  # Use the same credentials as the purchases service
+  host: "amqp://purchases-app:supersecret@rabbitmq.financial-billing.svc.cluster.local:5672/"
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-trigger-auth-rabbitmq-conn
+  namespace: financial-billing
+spec:
+  secretTargetRef:
+    - parameter: host
+      name: keda-rabbitmq-secret
+      key: host
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: purchases-scaler
+  namespace: financial-billing
+spec:
+  scaleTargetRef:
+    name: purchases-v1
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 15  # Check metrics every 15 seconds
+  cooldownPeriod: 15  # Wait 1 minute after last trigger before scaling down
+
+  triggers:
+    # 1. HTTP Request Rate Trigger using Prometheus
+    - type: prometheus
+      metadata:
+        # Prometheus server address (adjust if you have Prometheus installed)
+        serverAddress: http://prometheus.istio-system.svc.cluster.local:9090
+        # Query for requests per second to purchases service
+        # This uses Istio metrics to count requests
+        query: |
+          sum(rate(istio_requests_total{
+            destination_service_name="purchases",
+            destination_service_namespace="financial-billing"
+          }[1m]))
+        # Target: Scale when requests per second exceed this threshold
+        threshold: "10"
+        # Activate scaling when query returns a value (even if below threshold)
+        activationThreshold: "0"
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: invoices-scaler
+  namespace: financial-billing
+spec:
+  scaleTargetRef:
+    name: invoices-v1
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 15  # Check metrics every 15 seconds
+  cooldownPeriod: 15  # Wait 1 minute after last trigger before scaling down
+
+  # RabbitMQ Queue Length Trigger
+  triggers:
+      - type: rabbitmq
+        metadata:
+          protocol: amqp
+          queueName: purchases.events
+          mode: QueueLength
+          value: "5"  # Scale when queue has more than 5 messages
+          activationValue: "0"  # Activate when queue has any messages
+        authenticationRef:
+          name: keda-trigger-auth-rabbitmq-conn

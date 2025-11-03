@@ -1,0 +1,152 @@
+##################################################################################################
+# RabbitMQ Topology Configuration
+##################################################################################################
+# Queue for purchases
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: purchases-queue
+  namespace: financial-billing
+spec:
+  name: purchases.events
+  durable: true
+  autoDelete: false
+  arguments:
+    x-message-ttl: 86400000  # 24 hours
+    x-max-length: 10000
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Exchange for purchases
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: purchases-exchange
+  namespace: financial-billing
+spec:
+  name: purchases.exchange
+  type: direct
+  durable: true
+  autoDelete: false
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Bind purchases exchange to purchases queue
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: purchases-binding
+  namespace: financial-billing
+spec:
+  source: purchases.exchange
+  destination: purchases.events
+  destinationType: queue
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Queue for invoices
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: invoices.queue
+  namespace: financial-billing
+spec:
+  name: invoices.events
+  durable: true
+  autoDelete: false
+  arguments:
+    x-message-ttl: 86400000
+    x-max-length: 10000
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Exchange for invoices
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: invoices.exchange
+  namespace: financial-billing
+spec:
+  name: invoices.exchange
+  type: direct
+  durable: true
+  autoDelete: false
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Bind invoices exchange to invoices queue
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: invoices.binding
+  namespace: financial-billing
+spec:
+  source: invoices.exchange
+  destination: invoices.events
+  destinationType: queue
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# RabbitMQ User for purchases service
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: purchases-app-queue-user
+  namespace: financial-billing
+spec:
+  importCredentialsSecret:
+    name: purchases-app-queue-user-credentials
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+  tags:
+    - management
+    - policymaker
+---
+# RabbitMQ User for invoices service
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: invoices-app-queue-user
+  namespace: financial-billing
+spec:
+  importCredentialsSecret:
+    name: invoices-app-queue-user-credentials
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+  tags:
+    - management
+    - policymaker
+---
+# Permissions for purchases services user
+apiVersion: rabbitmq.com/v1beta1
+kind: Permission
+metadata:
+  name: purchases-app-queue-user-permissions
+  namespace: financial-billing
+spec:
+  vhost: "/"
+  permissions:
+    configure: ".*"
+    write: ".*"
+    read: ".*"
+  userReference:
+    name: purchases-app-queue-user
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq
+---
+# Permissions for invoices service user
+apiVersion: rabbitmq.com/v1beta1
+kind: Permission
+metadata:
+  name: invoices-app-queue-user-permissions
+  namespace: financial-billing
+spec:
+  vhost: "/"
+  permissions:
+    configure: ".*"
+    write: ".*"
+    read: ".*"
+  userReference:
+    name: invoices-app-queue-user
+  rabbitmqClusterReference:
+    name: financial-billing-rabbitmq

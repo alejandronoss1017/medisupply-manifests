@@ -1,0 +1,60 @@
+##################################################################################################
+# suppliers service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: suppliers-service
+  namespace: procurement-supply-optimization
+
+  labels:
+    app: suppliers-service
+    service: suppliers-service
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: suppliers
+---
+##################################################################################################
+# suppliers deployment
+##################################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suppliers
+  namespace: procurement-supply-optimization
+  labels:
+    app: suppliers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: suppliers
+  template:
+    metadata:
+      name: suppliers
+      labels:
+        app: suppliers
+    spec:
+      containers:
+        - name: suppliers
+          image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/suppliers/web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_HOST
+              value: events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092
+            - name: KAFKA_TOPIC
+              value: medicine.events
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+      restartPolicy: Always

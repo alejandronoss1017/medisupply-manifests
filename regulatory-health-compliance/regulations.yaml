@@ -63,6 +63,13 @@ spec:
               valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_SECRET_ACCESS_KEY } }
             - name: AWS_REGION
               valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_REGION } }
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
           readinessProbe:
             httpGet: { path: /health, port: 3000 }
             initialDelaySeconds: 2

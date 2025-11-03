@@ -95,3 +95,7 @@ fabric.properties
 common/aws-credentials/.env.aws
 
 .idea/*
+sample-eventmesh-k8s/*
+
+# helm chart temp files
+commerce-sales/charts/*
