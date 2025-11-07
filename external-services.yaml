@@ -12,3 +12,49 @@ spec:
       protocol: TLS
   location: MESH_EXTERNAL
   resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: aws-sns
+  namespace: istio-system  # Single entry in istio-system for cluster-wide access
+spec:
+  hosts:
+    - sns.us-east-1.amazonaws.com
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: polygon-amoy
+  namespace: istio-system  # Single entry in istio-system for cluster-wide access
+spec:
+  hosts:
+    - rpc-amoy.polygon.technology
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: alchemy-polygon-amoy
+  namespace: istio-system  # Single entry in istio-system for cluster-wide access
+spec:
+  hosts:
+    - polygon-amoy.g.alchemy.com
+  ports:
+    - number: 443
+      name: wss
+      protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
