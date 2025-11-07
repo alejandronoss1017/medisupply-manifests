@@ -1,0 +1,78 @@
+##################################################################################################
+# notifications service - blockchain event listener
+##################################################################################################
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-notifications
+  namespace: commerce-sales
+  labels:
+    account: notifications
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications-v1
+  namespace: commerce-sales
+  labels:
+    app: notifications
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifications
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: notifications
+        version: v1
+    spec:
+      serviceAccountName: medisupply-notifications
+
+      containers:
+        - name: listener
+          image: public.ecr.aws/a7x9j8u1/medisupply/commerce-sales/notifications/listener:latest
+          imagePullPolicy: Always
+          env:
+            - name: BLOCKCHAIN_RPC_URL
+              valueFrom: { secretKeyRef: { name: blockchain-credentials, key: ALCHEMY_BLOCKCHAIN_WSS_URL } }
+            - name: CONTRACT_ADDRESS
+              value: "0x18ec0b78Ca2959A0Ef55575aFC20a6158f88449A"
+            - name: START_BLOCK
+              value: "0"
+            - name: RECONNECT_INTERVAL
+              value: "5"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_FORMAT
+              value: "console"
+            - name: SNS_ENABLED
+              value: "true"
+            - name: SNS_TOPIC_ARN
+              value: "arn:aws:sns:us-east-1:080755501871:SLA"
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_ACCESS_KEY_ID_SNS } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: aws-credentials, key: AWS_SECRET_ACCESS_KEY_SNS } }
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "kill -0 1 2>/dev/null"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "kill -0 1 2>/dev/null"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
