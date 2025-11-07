@@ -1,0 +1,8 @@
+secretGenerator:
+  - name: blockchain-credentials
+    envs:
+      - .env
+    type: Opaque
+
+generatorOptions:
+  disableNameSuffixHash: true
