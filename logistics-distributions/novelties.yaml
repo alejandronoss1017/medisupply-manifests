@@ -1,0 +1,77 @@
+##################################################################################################
+# novelty service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: novelties-service
+  namespace: procurement-supply-optimization
+  labels:
+    app: novelties-service
+    service: novelties-service
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: novelties-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medisupply-novelties-service
+  namespace: procurement-supply-optimization
+  labels:
+    account: novelties-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: novelties-service-v1
+  namespace: procurement-supply-optimization
+  labels:
+    app: novelties-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: novelties-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: novelties-service
+        version: v1
+    spec:
+      serviceAccountName: medisupply-novelties-service
+
+      containers:
+        - name: web
+          image: public.ecr.aws/a7x9j8u1/medisupply/logistics-distributions/novelties/web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BLOCKCHAIN_RCP_URL
+              value: "https://rpc-amoy.polygon.technology/"
+            - name: CONTRACT_ADDRESS
+              value: "0x18ec0b78Ca2959A0Ef55575aFC20a6158f88449A"
+            - name: PRIVATE_KEY
+              valueFrom: { secretKeyRef: { name: blockchain-credentials, key: SECRET_KEY } }
+            - name: PORT
+              value: "8080"
+            - name: GIN_MODE
+              value: "release"
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
