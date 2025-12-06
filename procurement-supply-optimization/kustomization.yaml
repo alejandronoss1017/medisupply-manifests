@@ -1,8 +1,11 @@
 namespace: procurement-supply-optimization
 
 resources:
-  - kafka.yaml
-  - topics.yaml
-  - purchase-plans.yaml
-  - suppliers.yaml
+#  - kafka.yaml
+#  - topics.yaml
+#  - purchase-plans.yaml
+#  - suppliers.yaml
+  - contracts.yaml
+  - routes.yaml
   - ../common/aws-credentials
+  - ../common/blockchain

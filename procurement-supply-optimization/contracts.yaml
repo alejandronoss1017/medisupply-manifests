@@ -5,12 +5,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: contracts-service
+  namespace: procurement-supply-optimization
   labels:
     app: contracts-service
     service: contracts-service
 spec:
   ports:
-  - port: 3000
+  - port: 8080
     name: http
   selector:
     app: contracts-service
@@ -19,6 +20,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: medisupply-contracts-service
+  namespace: procurement-supply-optimization
   labels:
     account: contracts-service
 ---
@@ -26,6 +28,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contracts-service-v1
+  namespace: procurement-supply-optimization
   labels:
     app: contracts-service
     version: v1
@@ -44,58 +47,53 @@ spec:
       serviceAccountName: medisupply-contracts-service
 
       containers:
-#      - name: contracts-service
-#        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-web-service:latest
+      - name: web
+        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts/web:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+          - name: RCP_URL
+            value: "https://rpc-amoy.polygon.technology/"
+          - name: SMART_CONTRACT_ADDRESS
+            value: "0x18ec0b78Ca2959A0Ef55575aFC20a6158f88449A"
+          - name: PRIVATE_KEY
+            valueFrom: { secretKeyRef: { name: blockchain-credentials, key: SECRET_KEY } }
+          - name: PORT
+            value: "8080"
+          - name: GIN_MODE
+            value: "release"
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+#      - name: worker
+#        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-worker-service:latest
 #        imagePullPolicy: Always
-#        ports:
-#        - containerPort: 3000
 #        env:
 #          - name: SERVICE_NAME
-#            value: "Contracts Service"
+#            value: "CONTRACTS-MS-WORKER"
 #          - name: KAFKA_BROKERS
-#            value: "my-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
+#            value: "events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
 #          - name: KAFKA_CLIENT_ID
-#            value: "contracts-service"
-#          - name: PORT
-#            value: "3000"
-#        resources:
-#          requests:
-#            memory: "128Mi"
-#            cpu: "100m"
-#          limits:
-#            memory: "256Mi"
-#            cpu: "200m"
-#        readinessProbe:
-#          httpGet:
-#            path: /health
-#            port: 3000
-#          initialDelaySeconds: 2
-#          periodSeconds: 5
-#        livenessProbe:
-#          httpGet:
-#            path: /health
-#            port: 3000
-#          initialDelaySeconds: 5
-#          periodSeconds: 10
-      - name: contracts-worker
-        image: public.ecr.aws/a7x9j8u1/medisupply/procurement-supply-optimization/contracts-worker-service:latest
-        imagePullPolicy: Always
-        env:
-          - name: SERVICE_NAME
-            value: "CONTRACTS-MS-WORKER"
-          - name: KAFKA_BROKERS
-            value: "events-cluster-kafka-bootstrap.procurement-supply-optimization.svc.cluster.local:9092"
-          - name: KAFKA_CLIENT_ID
-            value: "contracts-ms-worker"
-          - name: KAFKA_GROUP_ID
-            value: "contracts-workers"
-          - name: KAFKA_TOPICS
-            value: "medicine.events"
-          - name: DDB_TABLE
-            value: "contracts-db"
-          - name: AWS_REGION
-            value: "us-east-2"
-          - name: KAFKA_DEFAULT_PARTITIONS
-            value: "1"
-          - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-            value: "1"
+#            value: "contracts-ms-worker"
+#          - name: KAFKA_GROUP_ID
+#            value: "contracts-workers"
+#          - name: KAFKA_TOPICS
+#            value: "medicine.events"
+#          - name: DDB_TABLE
+#            value: "contracts-db"
+#          - name: AWS_REGION
+#            value: "us-east-2"
+#          - name: KAFKA_DEFAULT_PARTITIONS
+#            value: "1"
+#          - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+#            value: "1"
